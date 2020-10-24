@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Layout } from 'antd';
 import EnhancedTable from '../../../components/table';
-import Notification from '../../../components/notification';
-import PageLoading from '../../../components/spin';
 import PageHeader from '../../../components/pageHeader';
 import PageLayout from '../../../components/pageLayout';
+import PageLoading from '../../../components/spin';
 import ApiService from "../../../service/api.service";
 import { ThemeContext } from "../../../context/custom";
 import { texts } from '../../../constant';
@@ -13,31 +12,24 @@ const { Content } = Layout;
 const headCells = [
   { id: 'id', align: false, disablePadding: true, label: 'Id' },
   { id: 'name', align: true, disablePadding: false, label: 'Name' },
-  { id: 'slug', align: true, disablePadding: false, label: 'Slug' },
   { id: 'status', align: true, disablePadding: false, label: 'Status' },
   { id: 'time', align: true, disablePadding: false, label: 'Updated Time' },
   { id: 'action', align: true, disablePadding: false, label: 'Action' },
 ];
-function createData(id, name, slug, status, time) {
-  return { id, name, slug, status, time };
+
+function createData(id, name, status, time) {
+  return { id, name, status, time };
 }
 const rowData = [
-  createData(1, 'Cupcake', 305, 3.7, 67),
-  createData(2, 'Donut', 452, 25.0, 51),
-  createData(3, 'Eclair', 262, 16.0, 24),
-  createData(4, 'Frozen yoghurt', 159, 6.0, 24),
-  createData(5, 'Gingerbread', 356, 16.0, 49),
-  createData(6, 'Honeycomb', 408, 3.2, 87),
-  createData(7, 'Ice cream sandwich', 237, 9.0, 37),
-  createData(8, 'Jelly Bean', 375, 0.0, 94),
-  createData(9, 'KitKat', 518, 26.0, 65),
-  createData(10, 'Lollipop', 392, 0.2, 98),
-  createData(11, 'Marshmallow', 318, 0, 81),
-  createData(12, 'Nougat', 360, 19.0, 9),
-  createData(13, 'Oreo', 437, 18.0, 63),
+  createData(1, 'BannerModule', 305, 3.7),
+  createData(2, 'IconCardModule', 452, 25.0),
+  createData(3, 'InfoCardModule', 262, 16.0),
+  createData(4, 'ImageCardModule', 159, 6.0),
+  createData(5, 'ImageModule', 356, 16.0),
+  createData(6, 'TextModule', 408, 3.2),
 ];
 
-function Pages(props) {
+function Modules(props) {
   const [isLoading, setLoading] = useState(true);
   const {collapsed, setCollapseData} = useContext(ThemeContext);
   const [currentPath, setCurrentPath] = useState('');
@@ -53,21 +45,23 @@ function Pages(props) {
   const toggle = () => {
     setCollapseData();
   };
+
   const handleDeleteItem = (selected) => {
+    // validate if sections are using the selected module
     setLoading(true);
     ApiService.deletePage(selected).then(() => {
       window.location.reload();
     }).catch((error) => {
       const resMessage = (error.response && error.response.data && error.response.data.message) || error.message || error.toString();
-      Notification({title: texts.notificationErr, description: resMessage, type: 'error'});
+      Notification({title: 'Error occurred', description: resMessage, type: 'error'});
       setLoading(false);
     });
   };
-  const handleDetailItem = (pageId) => {
-    props.history.push({ pathname: `/admin/pages/edit/${pageId}`, state: { pageId } });
+  const handleDetailItem = (moduleId) => {
+    props.history.push({ pathname: `/admin/modules/edit/${moduleId}`, state: { moduleId } });
   };
   const handleCreatePage = () => {
-    props.history.push('/admin/pages/create');
+    props.history.push('/admin/modules/create');
   };
 
   return (
@@ -79,7 +73,7 @@ function Pages(props) {
           <EnhancedTable
             headCells={headCells}
             rowData={rowData}
-            tableName={texts.pages}
+            tableName={texts.modules}
             onDeleteClick={handleDeleteItem}
             onDetailClick={handleDetailItem}
             onCreateClick={handleCreatePage}
@@ -90,4 +84,4 @@ function Pages(props) {
   );
 };
 
-export default Pages;
+export default Modules;

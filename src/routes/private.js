@@ -1,6 +1,7 @@
-import React, { useContext } from 'react'
-import { Route, Redirect } from "react-router-dom"
-import { AuthContext } from "../context/auth"
+import React, { useContext } from 'react';
+import { Route, Redirect } from "react-router-dom";
+import { AuthContext } from "../context/auth";
+import PrivateLayout from '../pages/private/layout';
 
 function PrivateRoute ({ component: Component, ...rest }) {
 	const { auth } = useContext(AuthContext);
@@ -8,7 +9,9 @@ function PrivateRoute ({ component: Component, ...rest }) {
 	return (
 		<Route {...rest} render={props =>
 			auth.token ? (
-				<Component {...props} />
+				<PrivateLayout {...props}>
+					<Component {...props} />
+				</PrivateLayout>
 			) : (
 				<Redirect to="/" />
 			)}

@@ -1,10 +1,11 @@
 import React, { useContext, useState } from "react";
 import { Redirect } from 'react-router-dom';
 import styled from 'styled-components';
-import { Form, Input, Button, Checkbox, Spin } from 'antd';
+import { Form, Input, Button, Checkbox } from 'antd';
 import { MailOutlined, LockOutlined } from '@ant-design/icons';
 import { AuthContext } from "../../../context/auth";
 import AuthService from "../../../service/auth.service";
+import PageLoading from '../../../components/spin';
 
 const SLoginWrap = styled.div`
   display: flex;
@@ -13,23 +14,6 @@ const SLoginWrap = styled.div`
   height: 100vh;
   background: #f5f5f5;
   transition: transform 0.5s ease,opacity 1s ease;
-`;
-const SSpin = styled(Spin)`
-  text-align: center;
-  background: rgba(255,255,255,0.5);
-  border-radius: 4px;
-  z-index: 1;
-  margin: auto;
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 `;
 const SFlexDiv = styled.div`
   display: flex;
@@ -117,12 +101,7 @@ function LoginPage(props) {
         initialValues={{ remember: true }}
         onFinish={onSubmit}
       >
-        {isLoading && 
-          <SSpin
-            spinning={isLoading}
-            size="large"
-          />
-        }
+        {isLoading && <PageLoading isLoading={isLoading} />}
         <SFlexDiv type="title">
           <h1>Logg inn</h1>                      
         </SFlexDiv>

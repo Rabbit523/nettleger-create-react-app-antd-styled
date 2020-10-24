@@ -1,6 +1,9 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 import styled from 'styled-components';
+import MainHeader from '../../../components/mainHeader';
+import { AuthContext } from "../../../context/auth";
+import { texts, svgIcons } from '../../../constant';
 
 const SPageWrap = styled.div`
   height: 100vh;
@@ -45,7 +48,7 @@ const SContent = styled.div`
   align-items: center;
   justify-content: center;
   margin-bottom: -4em;
-  min-height: 100vh;
+  min-height: calc(100vh - 64px);
   padding: 4em 0;
   transition: transform 0.5s ease,opacity 1s ease;
   h1 {
@@ -84,13 +87,24 @@ const SLink = styled(Link)`
   }
 `;
 
-function Home(props) {
+function Home() {
+  const { auth, setAuthData } = useContext(AuthContext);
+  
+  const logout = () => {
+    setAuthData({ token: null });
+  };
+
   return (
     <SPageWrap>
+      <MainHeader auth={auth} logout={logout} color={true} />
       <SContent>
-        <img src='/images/nettleger-logo-white.svg' alt="logo" />
-        <h1>Nettleger CMS Backend</h1>
-        <SLink to="/login">Logg inn</SLink>
+        <img src={svgIcons.white_logo} alt="logo" />
+        <h1>{texts.siteTitle}</h1>
+        {auth.token ? 
+          <SLink to="/admin/pages">{texts.dashboard}</SLink>
+          :
+          <SLink to="/login">{texts.login}</SLink>
+        }
       </SContent>
     </SPageWrap>
   );
