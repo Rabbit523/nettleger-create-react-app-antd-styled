@@ -97,7 +97,7 @@ export default function DraggableDataBox(props) {
           />
         </AccordionSummary>
         <AccordionDetails>
-          {data.type === 'Text' && (
+          {(data.type === 'Text' || data.type === 'Button') && (
             <TextField
               autoFocus
               fullWidth
@@ -204,6 +204,7 @@ export default function DraggableDataBox(props) {
               )}
             </Dropzone>
           )}
+
         </AccordionDetails>
         <Divider />
         <AccordionActions>

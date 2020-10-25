@@ -46,10 +46,10 @@ export const fieldTypes = [
     description: 'Images, videos PDFs and other files'
   },
   { id: 6,
-    type: 'Bool',
-    svg: '/images/bool.svg',
-    title: 'Boolean',
-    description: 'Yes or no, 1 or 0, true or false'
+    type: 'Button',
+    svg: '/images/button.svg',
+    title: 'Button',
+    description: 'Type of button with name'
   }
 ];
 
