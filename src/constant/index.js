@@ -100,6 +100,7 @@ export const texts = {
   detailSection: 'Detaljavsnitt',
   detailStep: 'Detalj trinn',
   addField: 'Legg til felt',
+  deleteFieldQue: 'Er du sikker på at du vil slette dette feltet?',
   actions: 'Handling',
   publish: 'Publisere',
   archive: 'Arkiv',

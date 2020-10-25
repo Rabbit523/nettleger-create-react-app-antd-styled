@@ -10,7 +10,8 @@ import SkeletonTypography from '../../../components/skeleton';
 import FieldSelectModal from '../../../components/fieldSelectModal';
 import FieldDetailModal from '../../../components/fieldDetailModal';
 import SideDrawer from '../../../components/drawer';
-import DraggableBox from '../../../components/draggable';
+import DraggableInfoBox from '../../../components/draggable';
+import DraggableDataBox from '../../../components/draggableData';
 import Notification from '../../../components/notification';
 import ApiService from "../../../service/api.service";
 import { texts } from '../../../constant';
@@ -53,7 +54,7 @@ export default function SingleModule(props) {
   const [moduleId, setModuleId] = useState(0);
   const [moduleName, setModuleName] = useState({});
   const [moduleContent, setModuleContent] = useState({});
-  const [moduleData, setModuleData] = useState({});
+  const [moduleData, setModuleData] = useState({name: '', content: {}});
   const [nFields, setNFields] = useState(0);
   const [isFieldSelectModal, setFieldSelectModal] = useState(false);
   const [isDetailModal, setDetailModal] = useState(false);
@@ -99,11 +100,9 @@ export default function SingleModule(props) {
       if(!isUnique(param.name, content)) {
         content[param.name] = param;
         setModuleContent(content); // create module content state
-        if (isEmpty(data)) {
-          data['content'] = content;
-        } else {
-          data['content'][param.name] = param;
-        }
+        let tmp = {};
+        tmp[param.name] = param;
+        Object.assign(data.content, tmp);
         setModuleData(data);
         setNFields(nFields + 1); // create fields count state
       } else {
@@ -114,7 +113,7 @@ export default function SingleModule(props) {
       let data = {...moduleData};
       if (isEmpty(content)) {
         content[param.name] = param;
-        data[param.name] = param;
+        Object.assign(data.name, param);
         setModuleName(param); // create module name state
         setModuleData(data);
         setNFields(nFields + 1); // create fields count state
@@ -137,21 +136,21 @@ export default function SingleModule(props) {
   };
   // Update module data to state
   const updateFieldData = (param) => {
-    if (param.name === 'name') {
-      let content = {...moduleName};
-      content.val = param.val;
-      setModuleName(content); // update module name state
-      let data = {...moduleData};
-      data['name'] = param.val;
-      setModuleData(data);
-    } else {
-      let content = {...moduleContent};
-      content[param.name]['val'] = param.val;
-      setModuleContent(content); // update module content state
-      let data = {...moduleData};
-      data['content'][param.name] = param.val;
-      setModuleData(data);
-    }
+    let content = {...moduleName};
+    content.val = param.val;
+    setModuleName(content); // update module name state
+    let data = {...moduleData};
+    data['name'] = param.val;
+    setModuleData(data);
+  };
+  const handleDeleteItem = (param) => {
+    let content = {...moduleContent};
+    let data = {...moduleData};
+    delete content[param.name];
+    setModuleContent(content); // create module content state
+    data.content = content;
+    setModuleData(data);
+    setNFields(nFields - 1); // create fields count state
   };
   // Save module data to DB
   const saveModule = () => {
@@ -167,7 +166,7 @@ export default function SingleModule(props) {
         ApiService.updateModule(moduleId, data).then(() => {
           Notification({title: texts.updateModule, description: texts.updateModuleSuccess, type: 'success'});
           setTimeout(() => {
-            window.location.reload();
+            props.history.push('/admin/modules');
           }, 2000);
         }).catch((error) => {
           const resMessage = (error.response && error.response.data && error.response.data.message) || error.message || error.toString();
@@ -178,7 +177,7 @@ export default function SingleModule(props) {
         ApiService.createModule(data).then(() => {
           Notification({title: texts.createModule, description: texts.createModuleSuccess, type: 'success'});
           setTimeout(() => {
-            window.location.reload();
+            props.history.push('/admin/modules');
           }, 2000);
         }).catch((error) => {
           const resMessage = (error.response && error.response.data && error.response.data.message) || error.message || error.toString();
@@ -230,17 +229,17 @@ export default function SingleModule(props) {
             <TabPane tab={texts.fields + " (" + nFields + ")"} key="1">
               {isEdit ? 
                 <React.Fragment>
-                  <DraggableBox data={moduleName} onClick={updateFieldData}/>
+                  <DraggableDataBox data={moduleName} onClick={updateFieldData}/>
                   {moduleContent && Object.keys(moduleContent).map((item, index) => (
-                    <DraggableBox data={item} onClick={updateFieldData} key={index}/>
+                    <DraggableInfoBox data={item} key={index} onClick={handleDeleteItem}/>
                   ))}
                 </React.Fragment>
                 :
                 <React.Fragment>
                   {isEmpty(moduleContent) && isEmpty(moduleName) && <SkeletonTypography />}
-                  {!isEmpty(moduleName) && <DraggableBox data={moduleName} onClick={updateFieldData}/>}
+                  {!isEmpty(moduleName) && <DraggableDataBox data={moduleName} onClick={updateFieldData}/>}
                   {!isEmpty(moduleContent) && Object.values(moduleContent).map((item, index) => (
-                    <DraggableBox data={item} onClick={updateFieldData} key={index} />
+                    <DraggableInfoBox data={item} key={index} onClick={handleDeleteItem} />
                   ))}
                 </React.Fragment>
               }
