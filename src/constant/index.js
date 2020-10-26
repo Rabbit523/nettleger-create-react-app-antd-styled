@@ -8,6 +8,7 @@ export const svgIcons = {
   Bool: '/images/boolIcon.svg',
   Date: '/images/dateIcon.svg',
   Reference: '/images/referenceIcon.svg',
+  Button: '/images/buttonOutline.svg',
   background: '/images/bg.svg',
   logo: '/images/nettleger-logo-color.svg',
   white_logo: '/images/nettleger-logo-white.svg'

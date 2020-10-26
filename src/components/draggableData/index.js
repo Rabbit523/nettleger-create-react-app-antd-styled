@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import Draggable from 'react-draggable';
 import Dropzone from 'react-dropzone';
@@ -45,9 +45,13 @@ const GreenRadio = withStyles({
 export default function DraggableDataBox(props) {
   const classes = useStyles();
   const { data, onClick } = props;
-  const [input, setInputValue] = useState(data.val ? data.val : "");
+  const [input, setInputValue] = useState("");
   const [richContent, setRichContent] = useState("");
   const [file, setFile] = useState("");
+
+  useEffect(() => {
+    data.val && setInputValue(data.val);
+  }, [data]);
 
   const handleChange = (e) => {
     setInputValue(e.target.value);
