@@ -57,7 +57,7 @@ Object.size = function(obj) {
 };
 
 export default function SingleModule(props) {
-  const [isLoading, setLoading] = useState(false);
+  const [isLoading, setLoading] = useState(true);
   const [moduleId, setModuleId] = useState(0);
   const [moduleName, setModuleName] = useState({});
   const [moduleContent, setModuleContent] = useState({});
@@ -72,7 +72,6 @@ export default function SingleModule(props) {
   useEffect(() => {
     if (props.location.state) {
       setIsEdit(true);
-      setLoading(true);
       setModuleId(props.location.state.moduleId);
       ApiService.getModule(props.location.state).then((response) => {
         const content = JSON.parse(response.content);
@@ -84,7 +83,10 @@ export default function SingleModule(props) {
       }).catch((error) => {
         const resMessage = (error.response && error.response.data && error.response.data.message) || error.message || error.toString();
         Notification({title: texts.notificationErr, description: resMessage, type: 'error'});
+        setLoading(false);
       });
+    } else {
+      setLoading(false);
     }
   }, [props]);
   // FieldTypes Modal Functions
@@ -196,11 +198,9 @@ export default function SingleModule(props) {
     }
   };
   // Set Sub module header buttons
-  const detailButtons = !isEdit ? [
+  const detailButtons = [
     <Button key="1" type="primary" onClick={saveModule}>{texts.save}</Button>,
     <Button key="2" onClick={openDrawer} className="btn-drawer"> <MoreOutlined /> </Button>
-  ] : [
-    <Button key="1" type="primary"> {texts.save}</Button>
   ];
 
   return (

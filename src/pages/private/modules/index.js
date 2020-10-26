@@ -27,23 +27,22 @@ function Modules(props) {
   const [currentPath, setCurrentPath] = useState('');
 
   useEffect(() => {
-    setTimeout(() => {
-      ApiService.getAllModule().then(result => {
-        const data = Object.values(result).map(row => {
-          const date = new Date(row.date);
-          var dateString = date.getUTCFullYear() + "/" + ("0" + (date.getUTCMonth()+1)).slice(-2) + "/" + ("0" + date.getUTCDate()).slice(-2) + " " +
-            ("0" + date.getUTCHours()).slice(-2) + ":" + ("0" + date.getUTCMinutes()).slice(-2) + ":" + ("0" + date.getUTCSeconds()).slice(-2);
-          data.push(createData(row.id, row.name, 'true', dateString));
-          return data;
-        });
-        setRowData(data);
-        setLoading(false);
-      }).catch(error => {
-        const resMessage = (error.response && error.response.data && error.response.data.message) || error.message || error.toString();
-        Notification({title: 'Error occurred', description: resMessage, type: 'error'});
-        setLoading(false);
+    ApiService.getAllModule().then(result => {
+      let data = [];
+      Object.values(result).map(row => {
+        const date = new Date(row.date);
+        var dateString = date.getUTCFullYear() + "/" + ("0" + (date.getUTCMonth()+1)).slice(-2) + "/" + ("0" + date.getUTCDate()).slice(-2) + " " +
+          ("0" + date.getUTCHours()).slice(-2) + ":" + ("0" + date.getUTCMinutes()).slice(-2) + ":" + ("0" + date.getUTCSeconds()).slice(-2);
+        data.push(createData(row.id, row.name, 'true', dateString));
+        return true;
       });
-    }, 3000);
+      setRowData(data);
+      setLoading(false);
+    }).catch(error => {
+      const resMessage = (error.response && error.response.data && error.response.data.message) || error.message || error.toString();
+      Notification({title: 'Error occurred', description: resMessage, type: 'error'});
+      setLoading(false);
+    });
     const pathname = props.location.pathname.split('/')[2];
     setCurrentPath(pathname);
   }, [props]);
