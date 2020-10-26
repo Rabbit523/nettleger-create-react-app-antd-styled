@@ -16,27 +16,33 @@ const headCells = [
   { id: 'time', align: true, disablePadding: false, label: 'Updated Time' },
   { id: 'action', align: true, disablePadding: false, label: 'Action' },
 ];
-
 function createData(id, name, status, time) {
   return { id, name, status, time };
 }
-const rowData = [
-  createData(1, 'BannerModule', 305, 3.7),
-  createData(2, 'IconCardModule', 452, 25.0),
-  createData(3, 'InfoCardModule', 262, 16.0),
-  createData(4, 'ImageCardModule', 159, 6.0),
-  createData(5, 'ImageModule', 356, 16.0),
-  createData(6, 'TextModule', 408, 3.2),
-];
 
 function Modules(props) {
   const [isLoading, setLoading] = useState(true);
+  const [rowData, setRowData] = useState([]);
   const {collapsed, setCollapseData} = useContext(ThemeContext);
   const [currentPath, setCurrentPath] = useState('');
 
   useEffect(() => {
     setTimeout(() => {
-      setLoading(false);
+      ApiService.getAllModule().then(result => {
+        const data = Object.values(result).map(row => {
+          const date = new Date(row.date);
+          var dateString = date.getUTCFullYear() + "/" + ("0" + (date.getUTCMonth()+1)).slice(-2) + "/" + ("0" + date.getUTCDate()).slice(-2) + " " +
+            ("0" + date.getUTCHours()).slice(-2) + ":" + ("0" + date.getUTCMinutes()).slice(-2) + ":" + ("0" + date.getUTCSeconds()).slice(-2);
+          data.push(createData(row.id, row.name, 'true', dateString));
+          return data;
+        });
+        setRowData(data);
+        setLoading(false);
+      }).catch(error => {
+        const resMessage = (error.response && error.response.data && error.response.data.message) || error.message || error.toString();
+        Notification({title: 'Error occurred', description: resMessage, type: 'error'});
+        setLoading(false);
+      });
     }, 3000);
     const pathname = props.location.pathname.split('/')[2];
     setCurrentPath(pathname);

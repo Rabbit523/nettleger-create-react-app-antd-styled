@@ -48,6 +48,13 @@ function findKeyValueCount(key, obj) {
 function isUnique(key, obj) {
 	return findKeyValueCount(key, obj) === 1;
 };
+Object.size = function(obj) {
+  var size = 0, key;
+  for (key in obj) {
+      if (obj.hasOwnProperty(key)) size++;
+  }
+  return size;
+};
 
 export default function SingleModule(props) {
   const [isLoading, setLoading] = useState(false);
@@ -66,12 +73,13 @@ export default function SingleModule(props) {
     if (props.location.state) {
       setIsEdit(true);
       setLoading(true);
-      setModuleId(props.location.state);
-      ApiService.getModule({id: props.location.state}).then((response) => {
-        const contents = JSON.parse(response.content);
-        setModuleContent(contents);
-        setModuleName(response.name);
-        setNFields(contents.length + 1);
+      setModuleId(props.location.state.moduleId);
+      ApiService.getModule(props.location.state).then((response) => {
+        const content = JSON.parse(response.content);
+        setModuleData({name: response.name, content})
+        setModuleContent(content);
+        setModuleName({name: 'name', type: 'Text', id: 'name', val: response.name});
+        setNFields(Object.size(content) + 1);
         setLoading(false);
       }).catch((error) => {
         const resMessage = (error.response && error.response.data && error.response.data.message) || error.message || error.toString();
@@ -230,7 +238,7 @@ export default function SingleModule(props) {
               {isEdit ? 
                 <React.Fragment>
                   <DraggableDataBox data={moduleName} onClick={updateFieldData}/>
-                  {moduleContent && Object.keys(moduleContent).map((item, index) => (
+                  {!isEmpty(moduleContent) && Object.values(moduleContent).map((item, index) => (
                     <DraggableInfoBox data={item} key={index} onClick={handleDeleteItem}/>
                   ))}
                 </React.Fragment>

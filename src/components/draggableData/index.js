@@ -104,6 +104,7 @@ export default function DraggableDataBox(props) {
               margin="dense"
               type="text"
               variant="outlined"
+              value={data.val}
               onChange={handleChange}
               label={texts.name}
             />

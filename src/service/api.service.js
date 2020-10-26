@@ -42,9 +42,17 @@ class ApiService {
       });
   }
 
+  getAllModule() {
+    return axios
+    .get(`${process.env.REACT_APP_BACKEND_URL}/api/module/getAll`,)
+    .then(response => {
+      return response.data;
+    });
+  }
+
   getModule(id) {
     return axios
-      .post(`${process.env.REACT_APP_BACKEND_URL}/api/module/get`, { id })
+      .post(`${process.env.REACT_APP_BACKEND_URL}/api/module/get`, id)
       .then(response => {
         return response.data;
       });
