@@ -70,7 +70,7 @@ export default function EnhancedTable(props) {
   const classes = useStyles();
   const [order, setOrder] = React.useState('asc');
   const [orderBy, setOrderBy] = React.useState('calories');
-  const [selected, setSelected] = React.useState([]);
+  const [selected, setSelected] = React.useState(0);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const { headCells, rowData, tableName, onDeleteClick, onDetailClick, onCreateClick } = props;
@@ -82,23 +82,7 @@ export default function EnhancedTable(props) {
   };
 
   const handleClick = (event, name) => {
-    const selectedIndex = selected.indexOf(name);
-    let newSelected = [];
-
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1),
-      );
-    }
-
-    setSelected(newSelected);
+    setSelected(name);
   };
 
   const handleEdit = (event, id) => {
@@ -114,7 +98,7 @@ export default function EnhancedTable(props) {
     setPage(0);
   };
 
-  const isSelected = (id) => selected.indexOf(id) !== -1;
+  const isSelected = (id) => selected === id;
 
   const emptyRows = rowsPerPage - Math.min(rowsPerPage, rowData.length - page * rowsPerPage);
 
@@ -122,7 +106,7 @@ export default function EnhancedTable(props) {
     <div className={classes.root}>
       <Paper className={classes.paper}>
         <EnhancedTableToolbar
-          numSelected={selected.length}
+          numSelected={selected ? 1 : 0}
           selected={selected}
           tableName={tableName}
           onDeleteClick={onDeleteClick}
@@ -170,7 +154,7 @@ export default function EnhancedTable(props) {
                       </TableCell>
                       <TableCell align="right">{row.name}</TableCell>
                       {tableName === 'Sider' && <TableCell align="right">{row.slug}</TableCell>}
-                      <TableCell align="right">{row.status}</TableCell>
+                      {tableName === 'Sider' && <TableCell align="right">{row.status}</TableCell>}
                       <TableCell align="right">{row.time}</TableCell>
                       <TableCell align="right">
                         <Tooltip title={texts.details}>

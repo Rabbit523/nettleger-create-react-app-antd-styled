@@ -66,9 +66,9 @@ class ApiService {
       });
   }
 
-  deleteModule(ids) {
+  deleteModule(id) {
     return axios
-      .post(`${process.env.REACT_APP_BACKEND_URL}/api/module/delete`, { ids })
+      .post(`${process.env.REACT_APP_BACKEND_URL}/api/module/delete`, id)
       .then(response => {
         return response.data;
       });

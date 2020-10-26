@@ -52,7 +52,12 @@ export const fieldTypes = [
     description: 'Type of button with name'
   }
 ];
-
+export const moduleHeadCells = [
+  { id: 'id', align: false, disablePadding: true, label: 'Id' },
+  { id: 'name', align: true, disablePadding: false, label: 'Name' },
+  { id: 'time', align: true, disablePadding: false, label: 'Updated Time' },
+  { id: 'action', align: true, disablePadding: false, label: 'Action' },
+];
 export const texts = {
   siteTitle: 'Nettleger CMS Backend',
   dashboard: 'Dashboard',
@@ -104,6 +109,8 @@ export const texts = {
   actions: 'Handling',
   publish: 'Publisere',
   archive: 'Arkiv',
+  published: 'Publisert',
+  archived: 'Arkivert',
   name: 'Navn',
   nameDescription: 'Den vises i oppføringsredigereren',
   fieldId: 'Felt ID',
@@ -131,7 +138,7 @@ export const texts = {
   notificationErr: 'Feil oppsto',
   notificationErrMsg: {name: 'Det kreves et navnefelt.', duplicate: 'Et navnefelt kan ikke dupliseres.', upload: 'Opplasting mislyktes.'},
   notificationSuccess: 'Suksess',
-  notificationSuccessMsg: {upload: 'laste opp vellykket!'},
+  notificationSuccessMsg: {upload: 'laste opp vellykket!', delete: 'Slette data er vellykket.'},
   notificationInfo: 'Informasjon',
   jsonPreview: 'Forhåndsvisning av JSON'
 };

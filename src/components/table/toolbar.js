@@ -92,7 +92,7 @@ export default function EnhancedTableToolbar (props) {
 
 EnhancedTableToolbar.propTypes = {
   numSelected: PropTypes.number.isRequired,
-  selected: PropTypes.array.isRequired,
+  selected: PropTypes.number.isRequired,
   onDeleteClick: PropTypes.func.isRequired,
   onCreateClick: PropTypes.func.isRequired,
 };

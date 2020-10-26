@@ -45,9 +45,10 @@ const GreenRadio = withStyles({
 export default function DraggableDataBox(props) {
   const classes = useStyles();
   const { data, onClick } = props;
-  const [input, setInputValue] = useState("");
+  const [input, setInputValue] = useState(data.val ? data.val : "");
   const [richContent, setRichContent] = useState("");
   const [file, setFile] = useState("");
+
   const handleChange = (e) => {
     setInputValue(e.target.value);
   };
@@ -104,7 +105,7 @@ export default function DraggableDataBox(props) {
               margin="dense"
               type="text"
               variant="outlined"
-              value={data.val}
+              value={input}
               onChange={handleChange}
               label={texts.name}
             />
