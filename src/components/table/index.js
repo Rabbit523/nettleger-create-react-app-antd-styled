@@ -82,7 +82,7 @@ export default function EnhancedTable(props) {
   };
 
   const handleClick = (event, name) => {
-    setSelected(name);
+    setSelected(selected === name ? 0 : name);
   };
 
   const handleEdit = (event, id) => {
