@@ -46,7 +46,7 @@ function Modules(props) {
     setCollapseData();
   };
 
-  const handleDeleteItem = (moduleId) => {
+  const handleDeleteModule = (moduleId) => {
     // validate if sections are using the selected module
     setLoading(true);
     ApiService.deleteModule({moduleId}).then((res) => {
@@ -58,10 +58,10 @@ function Modules(props) {
       setLoading(false);
     });
   };
-  const handleDetailItem = (moduleId) => {
+  const handleDetailModule = (moduleId) => {
     props.history.push({ pathname: `/admin/modules/edit/${moduleId}`, state: { moduleId } });
   };
-  const handleCreatePage = () => {
+  const handleCreateModule = () => {
     props.history.push('/admin/modules/create');
   };
 
@@ -75,9 +75,9 @@ function Modules(props) {
             headCells={moduleHeadCells}
             rowData={rowData}
             tableName={texts.modules}
-            onDeleteClick={handleDeleteItem}
-            onDetailClick={handleDetailItem}
-            onCreateClick={handleCreatePage}
+            onDeleteClick={handleDeleteModule}
+            onDetailClick={handleDetailModule}
+            onCreateClick={handleCreateModule}
           />
         </Content>
       </PageLayout>
