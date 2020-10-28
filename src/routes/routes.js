@@ -6,6 +6,7 @@ import Steps from '../pages/private/steps';
 import Modules from '../pages/private/modules';
 import SingleModule from '../pages/private/single-module';
 import Sections from '../pages/private/sections';
+import SingleSection from '../pages/private/single-section';
 import NoMatch from '../pages/public/noMatch';
 
 const routes = [
@@ -68,6 +69,18 @@ const routes = [
     exact: true,
     auth: true,
     component: Sections
+  },
+  {
+    path: '/admin/sections/create',
+    exact: true,
+    auth: true,
+    component: SingleSection
+  },
+  {
+    path: '/admin/sections/edit/:sectionId',
+    exact: true,
+    auth: true,
+    component: SingleSection
   },
   {
     path: '',

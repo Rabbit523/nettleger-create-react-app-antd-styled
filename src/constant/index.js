@@ -8,12 +8,13 @@ export const svgIcons = {
   Bool: '/images/boolIcon.svg',
   Date: '/images/dateIcon.svg',
   Reference: '/images/referenceIcon.svg',
+  Module: '/images/module.svg',
   Button: '/images/buttonOutline.svg',
   background: '/images/bg.svg',
   logo: '/images/nettleger-logo-color.svg',
   white_logo: '/images/nettleger-logo-white.svg'
 };
-export const fieldTypes = [
+export const moduleFieldTypes = [
   {
     id: 1,
     type: 'RichText',
@@ -53,11 +54,60 @@ export const fieldTypes = [
     description: 'Type of button with name'
   }
 ];
+export const sectionFieldTypes = [
+  {
+    id: 1,
+    type: 'RichText',
+    svg: '/images/rich-text.svg',
+    title: 'Rich text',
+    description: 'Text formatting with references and media'
+  },
+  {
+    id: 2,
+    type: 'Text',
+    svg: '/images/text.svg',
+    title: 'Text',
+    description: 'Titles, names, paragraphs, list of names'
+  },
+  { id: 3,
+    type: 'Number',
+    svg: '/images/number.svg',
+    title: 'Number',
+    description: 'ID, order number, rating, quantity'
+  },
+  { id: 4,
+    type: 'Media',
+    svg: '/images/media.svg',
+    title: 'Media',
+    description: 'Images, videos PDFs and other files'
+  },
+  {
+    id: 5,
+    type: 'Module',
+    svg: '/images/module.svg',
+    title: 'Module',
+    description: 'Select a module and make them as a group'
+  }
+];
 export const moduleHeadCells = [
   { id: 'id', align: false, disablePadding: true, label: 'Id' },
-  { id: 'name', align: true, disablePadding: false, label: 'Name' },
-  { id: 'time', align: true, disablePadding: false, label: 'Updated Time' },
-  { id: 'action', align: true, disablePadding: false, label: 'Action' },
+  { id: 'name', align: true, disablePadding: false, label: 'Navn' },
+  { id: 'time', align: true, disablePadding: false, label: 'Oppdatert tid' },
+  { id: 'action', align: true, disablePadding: false, label: 'Handling' },
+];
+export const sectionHeadCells = [
+  { id: 'id', align: false, disablePadding: true, label: 'Id' },
+  { id: 'name', align: true, disablePadding: false, label: 'Navn' },
+  { id: 'time', align: true, disablePadding: false, label: 'Oppdatert tid' },
+  { id: 'action', align: true, disablePadding: false, label: 'Handling' },
+];
+export const pageHeadCells = [
+  { id: 'id', align: false, disablePadding: true, label: 'Id' },
+  { id: 'name', align: true, disablePadding: false, label: 'Navn' },
+  { id: 'slug', align: true, disablePadding: false, label: 'Mordersnegle' },
+  { id: 'status', align: true, disablePadding: false, label: 'Status' },
+  { id: 'time', align: true, disablePadding: false, label: 'Oppdatert tid' },
+  { id: 'action', align: true, disablePadding: false, label: 'Handling' },
 ];
 export const texts = {
   siteTitle: 'Nettleger CMS Backend',
@@ -134,6 +184,7 @@ export const texts = {
   Bool: 'Nytt boolsk felt',
   Json: 'Nytt JSON-objektfelt',
   Reference: 'Nytt referansefelt',
+  Module: 'Velg en modul',
   dateTime: 'Dato tid',
   number: 'Nummer',
   notificationErr: 'Feil oppsto',
@@ -141,7 +192,9 @@ export const texts = {
   notificationSuccess: 'Suksess',
   notificationSuccessMsg: {upload: 'laste opp vellykket!', delete: 'Slette data er vellykket.'},
   notificationInfo: 'Informasjon',
-  jsonPreview: 'Forhåndsvisning av JSON'
+  jsonPreview: 'Forhåndsvisning av JSON',
+  direction: 'Retning',
+  fieldModuleAmount: 'Antall moduler',
 };
 
 export const customPageData = {
@@ -169,18 +222,4 @@ export const customPageData = {
     }
   ],
   sections: []
-};
-
-export const customSectionData= {
-  name: "",
-  title: "",
-  description: "",
-  direction: "",
-  modules: [
-    {
-      moduleID: "",
-      moduleX: "",
-      direction: "" // 모듈들의 방향
-    }
-  ]
 };

@@ -14,7 +14,7 @@ import DraggableInfoBox from '../../../components/draggable';
 import DraggableDataBox from '../../../components/draggableData';
 import Notification from '../../../components/notification';
 import ApiService from "../../../service/api.service";
-import { texts } from '../../../constant';
+import { texts, moduleFieldTypes } from '../../../constant';
 
 const { Content } = Layout;
 const { TabPane } = Tabs;
@@ -216,6 +216,7 @@ export default function SingleModule(props) {
         <Content>
           <FieldSelectModal
             open={isFieldSelectModal}
+            fieldTypes={moduleFieldTypes}
             handleClose={closeSelectFieldDialog}
             handleClick={handleFieldSelect}
           />

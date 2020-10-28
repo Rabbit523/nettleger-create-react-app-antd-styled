@@ -30,20 +30,24 @@ const SAccodionSummary = styled.div`
   }
 `;
 export default function DraggableInfoBox(props) {
-  const { data, onClick } = props;
+  const { data, onClick, openDetailModule } = props;
 
-  const confirm = () => {
+  const onConfirm = () => {
     onClick(data);
   };
-
-  const cancel = () => {
+  
+  const onCancel = () => {
     console.log("cancel delete field");
   };
+
+  const onDetail = () => {
+    (data.type === 'Module' || data.type === 'Section') && openDetailModule(data);
+  }
 
   return (
     <Draggable disabled={isMobile}>
       <SAccordion>
-        <SAccodionSummary>
+        <SAccodionSummary onClick={onDetail}>
           <IconButton size="small" className="btnMore"><MoreOutlined /></IconButton>
           <FormControlLabel
             aria-label="Acknowledge"
@@ -54,8 +58,8 @@ export default function DraggableInfoBox(props) {
         {data.name !== 'name' && 
           <Popconfirm
             title={texts.deleteFieldQue}
-            onConfirm={confirm}
-            onCancel={cancel}
+            onConfirm={onConfirm}
+            onCancel={onCancel}
             okText={texts.yes}
             cancelText={texts.no}
             icon={<QuestionCircleOutlined style={{ color: 'red' }} />}

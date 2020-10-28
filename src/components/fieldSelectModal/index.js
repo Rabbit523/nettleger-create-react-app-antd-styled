@@ -10,7 +10,7 @@ import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
-import { fieldTypes, texts } from '../../constant';
+import { texts } from '../../constant';
 
 const { Meta } = Card;
 
@@ -94,7 +94,7 @@ const SCard = styled(Card)`
 
 
 export default function FieldSelectModal(props) {
-  const { open, handleClose, handleClick } = props;
+  const { open, fieldTypes, handleClose, handleClick } = props;
   const classes = useStyles();
 
   const handleCardSelect = (item) => {
@@ -108,42 +108,20 @@ export default function FieldSelectModal(props) {
         <DialogContent dividers>
           <div className={classes.root}>
             <Grid container spacing={3}>
-              {fieldTypes.map((item, i) => {
-                  return item.id < 4 && (
-                    <Grid item xs key={i}>
-                      <SCard
-                        hoverable
-                        bordered={false}
-                        cover={<img alt="" src={item.svg} />}
-                        key={i}
-                        className={classes.card}
-                        onClick={(event) => handleCardSelect(item)}
-                      >
-                        <Meta title={item.title} description={item.description} />
-                      </SCard>
-                    </Grid>
-                  )
-                })
-              }
-            </Grid>
-            <Grid container spacing={3}>
-              {fieldTypes.map((item, i) => {
-                  return item.id > 3 && (
-                    <Grid item xs key={i}>
-                      <SCard
-                        hoverable
-                        bordered={false}
-                        cover={<img alt="" src={item.svg} />}
-                        key={i}
-                        className={classes.card}
-                        onClick={(event) => handleCardSelect(item)}
-                      >
-                        <Meta title={item.title} description={item.description} />
-                      </SCard>
-                    </Grid>
-                  )
-                })
-              }
+              {fieldTypes.map((item, i) => (
+                <Grid item xs key={i}>
+                  <SCard
+                    hoverable
+                    bordered={false}
+                    cover={<img alt="" src={item.svg} />}
+                    key={i}
+                    className={classes.card}
+                    onClick={(event) => handleCardSelect(item)}
+                  >
+                    <Meta title={item.title} description={item.description} />
+                  </SCard>
+                </Grid>)
+              )}
             </Grid>
           </div>
         </DialogContent>
@@ -154,6 +132,7 @@ export default function FieldSelectModal(props) {
 
 FieldSelectModal.propTypes = {
   open: PropTypes.bool.isRequired,
+  fieldTypes: PropTypes.array.isRequired,
   handleClose: PropTypes.func.isRequired,
   handleClick: PropTypes.func.isRequired
 };

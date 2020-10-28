@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Layout, Tabs, PageHeader, Button } from 'antd';
 import { MoreOutlined } from '@ant-design/icons';
-import ReactJson from 'react-json-view'
+import ReactJson from 'react-json-view';
 import styled from 'styled-components';
 import PageLoading from '../../../components/spin';
 import DetailPageLayout from '../../../components/detailPageLayout';
@@ -9,11 +9,14 @@ import PageLayout from '../../../components/pageLayout';
 import SkeletonTypography from '../../../components/skeleton';
 import FieldSelectModal from '../../../components/fieldSelectModal';
 import FieldDetailModal from '../../../components/fieldDetailModal';
+import SelectModuleModal from '../../../components/selectModuleModal';
 import SideDrawer from '../../../components/drawer';
-import DraggableBox from '../../../components/draggable';
+import DraggableInfoBox from '../../../components/draggable';
+import DraggableDataBox from '../../../components/draggableData';
+import JsonModal from '../../../components/jsonModal';
 import Notification from '../../../components/notification';
 import ApiService from "../../../service/api.service";
-import { texts } from '../../../constant';
+import { texts, sectionFieldTypes } from '../../../constant';
 
 const { Content } = Layout;
 const { TabPane } = Tabs;
@@ -50,35 +53,46 @@ function isUnique(key, obj) {
 
 export default function SingleSection(props) {
   const [isLoading, setLoading] = useState(false);
+  const [modules, setModules] = useState([]);
   const [sectionId, setSectionId] = useState(0);
   const [sectionName, setSectionName] = useState({});
   const [sectionContent, setSectionContent] = useState({});
+  const [moduleDetail, setModuleDetail] = useState({});
   const [sectionData, setSectionData] = useState({name: '', content: {}});
   const [nFields, setNFields] = useState(0);
   const [isFieldSelectModal, setFieldSelectModal] = useState(false);
   const [isDetailModal, setDetailModal] = useState(false);
+  const [isModuleDetailModal, setModuleDetailModal] = useState(false);
+  const [isSelectModuleModal, setSelectModuleModal] = useState(false);
   const [isDrawer, setDrawer] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [detailModalTitle, setDetailModalTitle] = useState('');
   
   useEffect(() => {
-    if (props.location.state) {
-      setIsEdit(true);
-      setLoading(true);
-      setSectionId(props.location.state);
-      ApiService.getSection({id: props.location.state}).then((response) => {
-        const contents = JSON.parse(response.content);
-        setSectionContent(contents);
-        setSectionName(response.name);
-        setNFields(contents.length + 1);
-        setLoading(false);
-      }).catch((error) => {
-        const resMessage = (error.response && error.response.data && error.response.data.message) || error.message || error.toString();
-        Notification({title: texts.notificationErr, description: resMessage, type: 'error'});
-      });
-    }
+    ApiService.getAllModule().then(result => {
+      const resultArr = Object.values(result);
+      setModules(resultArr);
+      if (props.location.state) {
+        setIsEdit(true);
+        setLoading(true);
+        setSectionId(props.location.state);
+        ApiService.getSection({id: props.location.state}).then((response) => {
+          const contents = JSON.parse(response.content);
+          setSectionContent(contents);
+          setSectionName(response.name);
+          setNFields(contents.length + 1);
+          setLoading(false);
+        }).catch((error) => {
+          const resMessage = (error.response && error.response.data && error.response.data.message) || error.message || error.toString();
+          Notification({title: texts.notificationErr, description: resMessage, type: 'error'});
+        });
+      }
+    }).catch((error) => {
+      const resMessage = (error.response && error.response.data && error.response.data.message) || error.message || error.toString();
+      Notification({title: texts.notificationErr, description: resMessage, type: 'error'});
+    });
   }, [props]);
-  // FieldTypes Modal Functions
+  // FieldTypes Modal Callbacks
   const openSelectFieldDialog = () => {
     setFieldSelectModal(true);
   };
@@ -88,9 +102,9 @@ export default function SingleSection(props) {
   const handleFieldSelect = (param) => {
     setFieldSelectModal(false);
     setDetailModalTitle(param.type);
-    setDetailModal(true);
+    param.type !== 'Module' ? setDetailModal(true) : setSelectModuleModal(true);
   };
-  // FieldDetail Modal Functions
+  // FieldDetail Modal Callbacks // update state, close, open modal
   const saveFieldDetail = (param) => {
     setDetailModal(false);
     if (param.name !== 'name') {
@@ -126,6 +140,36 @@ export default function SingleSection(props) {
   const closeDetailModal = () => {
     setDetailModal(false);
   };
+  // SelectModule Modal Callbacks // update state, close, open modal
+  const saveSelectModule = (param) => {
+    setSelectModuleModal(false);
+    const selectedModule = modules.find((sel) => sel.id === parseInt(param.moduleId));
+    let content = {...sectionContent};
+    let data = {...sectionData};
+    let dataContent = { ...data.content};
+
+    content[selectedModule.name] = {type: 'Module', name: selectedModule.name};
+    setSectionContent(content); // add module content to the contents state
+    if (dataContent.hasOwnProperty('modules')) {
+      dataContent.modules.push(param);
+      Object.assign(data.content, dataContent);
+      setSectionData(data);
+      setNFields(nFields + 1);
+    } else {
+      dataContent['modules'] = new Array(param);
+      Object.assign(data.content, dataContent);
+      setSectionData(data);
+      setNFields(nFields + 1);
+    }
+
+  };
+  const backSelectModuleModal = () => {
+    setSelectModuleModal(false);
+    setFieldSelectModal(true);
+  };
+  const closeSelectModuleModal = () => {
+    setSelectModuleModal(false);
+  };
   // Drawer Functions
   const openDrawer = () => {
     setDrawer(true); // show side panel
@@ -133,14 +177,26 @@ export default function SingleSection(props) {
   const closeDrawer = () => {
     setDrawer(false); // hide side panel
   };
-  // Update module data to state
+  // open & close module detail json view modal
+  const openModuleDetailModal = (param) => {
+    setModuleDetailModal(true);
+    if (param) {
+      const selectedModule = modules.find((sel) => sel.name === param.name);
+      const moduleContent = JSON.parse(selectedModule.content);
+      setModuleDetail(moduleContent);
+    }
+  };
+  const closeModuleDetailModal = () => {
+    setModuleDetailModal(false);
+  };
+  // Update section data to state
   const updateFieldData = (param) => {
     if (param.name === 'name') {
       let content = {...sectionName};
       content.val = param.val;
       setSectionName(content); // update module name state
       let data = {...sectionData};
-      Object.assign(data.name, param.val);
+      data.name = param.val;
       setSectionData(data);
     } else {
       let content = {...sectionContent};
@@ -151,7 +207,24 @@ export default function SingleSection(props) {
       setSectionData(data);
     }
   };
-  // Save module data to DB
+  const handleDeleteItem = (param) => {
+    let content = {...sectionContent};
+    let data = {...sectionData};
+    let dataContent = {...data.content};
+        
+    delete content[param.name];
+    setSectionContent(content); // create module content state
+    if (param.type !== 'Module') {
+      delete dataContent[param.name];
+    } else {
+      const selectedModuleId = modules.findIndex((item) => item.name === param.name);
+      dataContent.modules.splice(selectedModuleId, 1);
+    }
+    data.content = dataContent;
+    setSectionData(data);
+    setNFields(nFields - 1); // create fields count state
+  };
+  // Save section data to DB
   const saveModule = () => {
     if (isEmpty(sectionName) || !sectionName.val) {
       Notification({title: texts.notificationErr, description: texts.notificationErrMsg.name, type: 'error'});
@@ -162,7 +235,7 @@ export default function SingleSection(props) {
         content: JSON.stringify(sectionData.content)
       };
       if (isEdit) {
-        ApiService.updateModule(sectionId, data).then(() => {
+        ApiService.updateSection(sectionId, data).then(() => {
           Notification({title: texts.updateModule, description: texts.updateModuleSuccess, type: 'success'});
           setTimeout(() => {
             window.location.reload();
@@ -173,7 +246,7 @@ export default function SingleSection(props) {
           setLoading(false);
         });
       } else {
-        ApiService.createModule(data).then(() => {
+        ApiService.createSection(data).then(() => {
           Notification({title: texts.createModule, description: texts.createModuleSuccess, type: 'success'});
           setTimeout(() => {
             window.location.reload();
@@ -186,7 +259,7 @@ export default function SingleSection(props) {
       }
     }
   };
-  // Set Sub module header buttons
+  // Set Sub section header buttons
   const detailButtons = !isEdit ? [
     <Button key="1" type="primary" onClick={saveModule}>{texts.save}</Button>,
     <Button key="2" onClick={openDrawer} className="btn-drawer"> <MoreOutlined /> </Button>
@@ -200,13 +273,14 @@ export default function SingleSection(props) {
       <PageHeader
         ghost={false}
         onBack={() => window.history.back()}
-        title={texts.detailModule}
+        title={texts.detailSection}
         extra={detailButtons}
       />
       <PageLayout>
         <Content>
           <FieldSelectModal
             open={isFieldSelectModal}
+            fieldTypes={sectionFieldTypes}
             handleClose={closeSelectFieldDialog}
             handleClick={handleFieldSelect}
           />
@@ -217,9 +291,23 @@ export default function SingleSection(props) {
             handleBack={backDetailModal}
             handleClick={saveFieldDetail}
           />
+          <SelectModuleModal
+            open={isSelectModuleModal}
+            type={detailModalTitle}
+            modules={modules}
+            handleClose={closeSelectModuleModal}
+            handleBack={backSelectModuleModal}
+            handleClick={saveSelectModule}
+          />
+          <JsonModal
+            open={isModuleDetailModal}
+            jsonData={moduleDetail}
+            title={texts.detailModule}
+            handleClose={closeModuleDetailModal}
+          />
           <SideDrawer
             visible={isDrawer}
-            type={texts.module}
+            type={texts.section}
             fields={nFields}
             onClose={closeDrawer}
             onAdd={openSelectFieldDialog}
@@ -228,17 +316,17 @@ export default function SingleSection(props) {
             <TabPane tab={texts.fields + " (" + nFields + ")"} key="1">
               {isEdit ? 
                 <React.Fragment>
-                  <DraggableBox data={sectionName} onClick={updateFieldData}/>
+                  <DraggableDataBox data={sectionName} onClick={updateFieldData}/>
                   {sectionContent && Object.keys(sectionContent).map((item, index) => (
-                    <DraggableBox data={item} onClick={updateFieldData} key={index}/>
+                    <DraggableInfoBox data={item} onClick={handleDeleteItem} openDetailModule={openModuleDetailModal} key={index} />
                   ))}
                 </React.Fragment>
                 :
                 <React.Fragment>
                   {isEmpty(sectionContent) && isEmpty(sectionName) && <SkeletonTypography />}
-                  {!isEmpty(sectionName) && <DraggableBox data={sectionName} onClick={updateFieldData}/>}
+                  {!isEmpty(sectionName) && <DraggableDataBox data={sectionName} onClick={updateFieldData}/>}
                   {!isEmpty(sectionContent) && Object.values(sectionContent).map((item, index) => (
-                    <DraggableBox data={item} onClick={updateFieldData} key={index} />
+                    <DraggableInfoBox data={item} onClick={handleDeleteItem} openDetailModule={openModuleDetailModal} key={index} />
                   ))}
                 </React.Fragment>
               }
