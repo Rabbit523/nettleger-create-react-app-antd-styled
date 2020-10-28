@@ -11,6 +11,10 @@ import { texts, sectionHeadCells } from '../../../constant';
 
 const { Content } = Layout;
 
+function createData(id, name, time) {
+  return { id, name, time };
+}
+
 function Sections(props) {
   const [isLoading, setLoading] = useState(false);
   const [rowData, setRowData] = useState([]);
@@ -18,22 +22,22 @@ function Sections(props) {
   const [currentPath, setCurrentPath] = useState('');
 
   useEffect(() => {
-    // ApiService.getAllModule().then(result => {
-    //   let data = [];
-    //   Object.values(result).map(row => {
-    //     const date = new Date(row.date);
-    //     const dateString = date.getUTCFullYear() + "/" + ("0" + (date.getUTCMonth()+1)).slice(-2) + "/" + ("0" + date.getUTCDate()).slice(-2) + " " +
-    //       ("0" + date.getUTCHours()).slice(-2) + ":" + ("0" + date.getUTCMinutes()).slice(-2) + ":" + ("0" + date.getUTCSeconds()).slice(-2);
-    //     data.push(createData(row.id, row.name, dateString));
-    //     return true;
-    //   });
-    //   setRowData(data);
-    //   setLoading(false);
-    // }).catch(error => {
-    //   const resMessage = (error.response && error.response.data && error.response.data.message) || error.message || error.toString();
-    //   Notification({title: texts.notificationErr, description: resMessage, type: 'error'});
-    //   setLoading(false);
-    // });
+    ApiService.getAllSection().then(result => {
+      let data = [];
+      Object.values(result).map(row => {
+        const date = new Date(row.date);
+        const dateString = date.getUTCFullYear() + "/" + ("0" + (date.getUTCMonth()+1)).slice(-2) + "/" + ("0" + date.getUTCDate()).slice(-2) + " " +
+          ("0" + date.getUTCHours()).slice(-2) + ":" + ("0" + date.getUTCMinutes()).slice(-2) + ":" + ("0" + date.getUTCSeconds()).slice(-2);
+        data.push(createData(row.id, row.name, dateString));
+        return true;
+      });
+      setRowData(data);
+      setLoading(false);
+    }).catch(error => {
+      const resMessage = (error.response && error.response.data && error.response.data.message) || error.message || error.toString();
+      Notification({title: texts.notificationErr, description: resMessage, type: 'error'});
+      setLoading(false);
+    });
     setRowData([]);
     const pathname = props.location.pathname.split('/')[2];
     setCurrentPath(pathname);

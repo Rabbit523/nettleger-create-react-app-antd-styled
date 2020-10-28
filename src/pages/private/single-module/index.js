@@ -25,6 +25,7 @@ const STabs = styled(Tabs)`
   }
   .ant-tabs-content {
     height: 100%;
+    overflow-y: scroll;
   }
 `;
 

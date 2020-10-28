@@ -27,6 +27,7 @@ const STabs = styled(Tabs)`
   }
   .ant-tabs-content {
     height: 100%;
+    overflow-y: scroll;
   }
 `;
 
@@ -53,19 +54,19 @@ function isUnique(key, obj) {
 
 export default function SingleSection(props) {
   const [isLoading, setLoading] = useState(false);
-  const [modules, setModules] = useState([]);
-  const [sectionId, setSectionId] = useState(0);
-  const [sectionName, setSectionName] = useState({});
-  const [sectionContent, setSectionContent] = useState({});
-  const [moduleDetail, setModuleDetail] = useState({});
-  const [sectionData, setSectionData] = useState({name: '', content: {}});
-  const [nFields, setNFields] = useState(0);
   const [isFieldSelectModal, setFieldSelectModal] = useState(false);
   const [isDetailModal, setDetailModal] = useState(false);
   const [isModuleDetailModal, setModuleDetailModal] = useState(false);
   const [isSelectModuleModal, setSelectModuleModal] = useState(false);
   const [isDrawer, setDrawer] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
+  const [modules, setModules] = useState([]);
+  const [sectionId, setSectionId] = useState(0);
+  const [nFields, setNFields] = useState(0);
+  const [sectionName, setSectionName] = useState({});
+  const [sectionContent, setSectionContent] = useState({});
+  const [moduleDetail, setModuleDetail] = useState({});
+  const [sectionData, setSectionData] = useState({name: '', content: {}});
   const [detailModalTitle, setDetailModalTitle] = useState('');
   
   useEffect(() => {
@@ -75,12 +76,35 @@ export default function SingleSection(props) {
       if (props.location.state) {
         setIsEdit(true);
         setLoading(true);
-        setSectionId(props.location.state);
-        ApiService.getSection({id: props.location.state}).then((response) => {
-          const contents = JSON.parse(response.content);
+        setSectionId(props.location.state.sectionId);
+        ApiService.getSection(props.location.state).then((response) => {
+          let data = {...sectionData};
+          let dataContent = {...data.content};
+          data.name = response.name;
+          setSectionName({name: 'name', type: 'Text', id: 'name', val: response.name});
+
+          const content = JSON.parse(response.content);
+          let contents = {};
+          Object.keys(content).forEach((key) => {
+            if (!Array.isArray(content[key])) {
+              contents[key] = content[key];
+              dataContent[key] = content[key];
+            } else {
+              content[key].map((item) => {
+                const selectedModule = resultArr.find((sel) => sel.id === parseInt(item.moduleId));
+                contents[selectedModule.name] = {type: 'Module', name: selectedModule.name};
+                if (dataContent.hasOwnProperty('modules')) {
+                  dataContent['modules'].push(item);
+                } else {
+                  dataContent['modules'] = new Array(item);
+                }
+              });
+            }
+          });
+          Object.assign(data.content, dataContent);
+          setSectionData(data);
           setSectionContent(contents);
-          setSectionName(response.name);
-          setNFields(contents.length + 1);
+          setNFields(Object.keys(contents).length + 1);
           setLoading(false);
         }).catch((error) => {
           const resMessage = (error.response && error.response.data && error.response.data.message) || error.message || error.toString();
@@ -225,7 +249,7 @@ export default function SingleSection(props) {
     setNFields(nFields - 1); // create fields count state
   };
   // Save section data to DB
-  const saveModule = () => {
+  const saveSection = () => {
     if (isEmpty(sectionName) || !sectionName.val) {
       Notification({title: texts.notificationErr, description: texts.notificationErrMsg.name, type: 'error'});
     } else {
@@ -260,11 +284,9 @@ export default function SingleSection(props) {
     }
   };
   // Set Sub section header buttons
-  const detailButtons = !isEdit ? [
-    <Button key="1" type="primary" onClick={saveModule}>{texts.save}</Button>,
+  const detailButtons = [
+    <Button key="1" type="primary" onClick={saveSection}>{texts.save}</Button>,
     <Button key="2" onClick={openDrawer} className="btn-drawer"> <MoreOutlined /> </Button>
-  ] : [
-    <Button key="1" type="primary"> {texts.save}</Button>
   ];
 
   return (
@@ -317,7 +339,7 @@ export default function SingleSection(props) {
               {isEdit ? 
                 <React.Fragment>
                   <DraggableDataBox data={sectionName} onClick={updateFieldData}/>
-                  {sectionContent && Object.keys(sectionContent).map((item, index) => (
+                  {sectionContent && Object.values(sectionContent).map((item, index) => (
                     <DraggableInfoBox data={item} onClick={handleDeleteItem} openDetailModule={openModuleDetailModal} key={index} />
                   ))}
                 </React.Fragment>

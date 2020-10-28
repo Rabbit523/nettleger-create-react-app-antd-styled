@@ -1,39 +1,7 @@
 import axios from "axios";
 
 class ApiService {
-
-  createPage(data) {
-    return axios
-      .post(`${process.env.REACT_APP_BACKEND_URL}/api/page/create`, { data })
-      .then(response => {
-        return response.data;
-      });
-  }
-
-  getPage(id) {
-    return axios
-      .post(`${process.env.REACT_APP_BACKEND_URL}/api/page/get`, { id })
-      .then(response => {
-        return response.data;
-      });
-  }
-
-  updatePage(id, data) {
-    return axios
-      .post(`${process.env.REACT_APP_BACKEND_URL}/api/page/update`, { id, data })
-      .then(response => {
-        return response.data;
-      });
-  }
-
-  deletePage(ids) {
-    return axios
-      .post(`${process.env.REACT_APP_BACKEND_URL}/api/page/delete`, { ids })
-      .then(response => {
-        return response.data;
-      });
-  }
-
+  // MODULE API
   createModule(data) {
     return axios
       .post(`${process.env.REACT_APP_BACKEND_URL}/api/module/create`, data)
@@ -73,7 +41,7 @@ class ApiService {
         return response.data;
       });
   }
-  
+  // MODULE API - CUSTOM API => Upload file
   fileUpload(formData) {
     let config = {
       headers : {
@@ -82,6 +50,78 @@ class ApiService {
     };
     return axios
       .post(`${process.env.REACT_APP_BACKEND_URL}/api/custom/fileupload`, formData, config)
+      .then(response => {
+        return response.data;
+      });
+  }
+  // SECTION API
+  createSection(data) {
+    return axios
+      .post(`${process.env.REACT_APP_BACKEND_URL}/api/section/create`, data)
+      .then(response => {
+        return response.data;
+      });
+  }
+
+  getSection(id) {
+    return axios
+      .post(`${process.env.REACT_APP_BACKEND_URL}/api/section/get`, id)
+      .then(response => {
+        return response.data;
+      });
+  }
+
+  getAllSection() {
+    return axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/api/section/getAll`,)
+      .then(response => {
+        return response.data;
+      });
+  }
+
+  updateSection(id, data) {
+    return axios
+      .post(`${process.env.REACT_APP_BACKEND_URL}/api/section/update`, { id, data })
+      .then(response => {
+        return response.data;
+      });
+  }
+
+  deleteSection(id) {
+    return axios
+      .post(`${process.env.REACT_APP_BACKEND_URL}/api/section/delete`, id)
+      .then(response => {
+        return response.data;
+      });
+  }
+
+  createPage(data) {
+    return axios
+      .post(`${process.env.REACT_APP_BACKEND_URL}/api/page/create`, { data })
+      .then(response => {
+        return response.data;
+      });
+  }
+
+  getPage(id) {
+    return axios
+      .post(`${process.env.REACT_APP_BACKEND_URL}/api/page/get`, { id })
+      .then(response => {
+        return response.data;
+      });
+  }
+
+  updatePage(id, data) {
+    return axios
+      .post(`${process.env.REACT_APP_BACKEND_URL}/api/page/update`, { id, data })
+      .then(response => {
+        return response.data;
+      });
+  }
+
+  deletePage(ids) {
+    return axios
+      .post(`${process.env.REACT_APP_BACKEND_URL}/api/page/delete`, { ids })
       .then(response => {
         return response.data;
       });
