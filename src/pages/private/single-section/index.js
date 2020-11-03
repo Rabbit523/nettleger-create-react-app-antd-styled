@@ -9,7 +9,7 @@ import PageLayout from '../../../components/pageLayout';
 import SkeletonTypography from '../../../components/skeleton';
 import FieldSelectModal from '../../../components/fieldSelectModal';
 import FieldDetailModal from '../../../components/fieldDetailModal';
-import SelectModuleModal from '../../../components/selectModuleModal';
+import SelectModal from '../../../components/selectModal';
 import SideDrawer from '../../../components/drawer';
 import DraggableInfoBox from '../../../components/draggable';
 import DraggableDataBox from '../../../components/draggableData';
@@ -27,7 +27,8 @@ const STabs = styled(Tabs)`
   }
   .ant-tabs-content {
     height: 100%;
-    overflow-y: scroll;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 `;
 
@@ -57,12 +58,12 @@ export default function SingleSection(props) {
   const [isFieldSelectModal, setFieldSelectModal] = useState(false);
   const [isDetailModal, setDetailModal] = useState(false);
   const [isModuleDetailModal, setModuleDetailModal] = useState(false);
-  const [isSelectModuleModal, setSelectModuleModal] = useState(false);
+  const [isSelectModal, setSelectModal] = useState(false);
   const [isDrawer, setDrawer] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
-  const [modules, setModules] = useState([]);
   const [sectionId, setSectionId] = useState(0);
   const [nFields, setNFields] = useState(0);
+  const [modules, setModules] = useState([]);
   const [sectionName, setSectionName] = useState({});
   const [sectionContent, setSectionContent] = useState({});
   const [moduleDetail, setModuleDetail] = useState({});
@@ -98,6 +99,7 @@ export default function SingleSection(props) {
                 } else {
                   dataContent['modules'] = new Array(item);
                 }
+                return true;
               });
             }
           });
@@ -126,7 +128,7 @@ export default function SingleSection(props) {
   const handleFieldSelect = (param) => {
     setFieldSelectModal(false);
     setDetailModalTitle(param.type);
-    param.type !== 'Module' ? setDetailModal(true) : setSelectModuleModal(true);
+    param.type !== 'Module' ? setDetailModal(true) : setSelectModal(true);
   };
   // FieldDetail Modal Callbacks // update state, close, open modal
   const saveFieldDetail = (param) => {
@@ -164,9 +166,9 @@ export default function SingleSection(props) {
   const closeDetailModal = () => {
     setDetailModal(false);
   };
-  // SelectModule Modal Callbacks // update state, close, open modal
-  const saveSelectModule = (param) => {
-    setSelectModuleModal(false);
+  // Select Modal Callbacks // update state, close, open modal
+  const saveSelect = (param) => {
+    setSelectModal(false);
     const selectedModule = modules.find((sel) => sel.id === parseInt(param.moduleId));
     let content = {...sectionContent};
     let data = {...sectionData};
@@ -185,14 +187,13 @@ export default function SingleSection(props) {
       setSectionData(data);
       setNFields(nFields + 1);
     }
-
   };
-  const backSelectModuleModal = () => {
-    setSelectModuleModal(false);
+  const backSelectModal = () => {
+    setSelectModal(false);
     setFieldSelectModal(true);
   };
-  const closeSelectModuleModal = () => {
-    setSelectModuleModal(false);
+  const closeSelectModal = () => {
+    setSelectModal(false);
   };
   // Drawer Functions
   const openDrawer = () => {
@@ -313,13 +314,13 @@ export default function SingleSection(props) {
             handleBack={backDetailModal}
             handleClick={saveFieldDetail}
           />
-          <SelectModuleModal
-            open={isSelectModuleModal}
+          <SelectModal
+            open={isSelectModal}
             type={detailModalTitle}
-            modules={modules}
-            handleClose={closeSelectModuleModal}
-            handleBack={backSelectModuleModal}
-            handleClick={saveSelectModule}
+            data={modules}
+            handleClose={closeSelectModal}
+            handleBack={backSelectModal}
+            handleClick={saveSelect}
           />
           <JsonModal
             open={isModuleDetailModal}
@@ -338,7 +339,7 @@ export default function SingleSection(props) {
             <TabPane tab={texts.fields + " (" + nFields + ")"} key="1">
               {isEdit ? 
                 <React.Fragment>
-                  <DraggableDataBox data={sectionName} onClick={updateFieldData}/>
+                  <DraggableDataBox data={sectionName} onSend={updateFieldData}/>
                   {sectionContent && Object.values(sectionContent).map((item, index) => (
                     <DraggableInfoBox data={item} onClick={handleDeleteItem} openDetailModule={openModuleDetailModal} key={index} />
                   ))}
@@ -346,7 +347,7 @@ export default function SingleSection(props) {
                 :
                 <React.Fragment>
                   {isEmpty(sectionContent) && isEmpty(sectionName) && <SkeletonTypography />}
-                  {!isEmpty(sectionName) && <DraggableDataBox data={sectionName} onClick={updateFieldData}/>}
+                  {!isEmpty(sectionName) && <DraggableDataBox data={sectionName} onSend={updateFieldData}/>}
                   {!isEmpty(sectionContent) && Object.values(sectionContent).map((item, index) => (
                     <DraggableInfoBox data={item} onClick={handleDeleteItem} openDetailModule={openModuleDetailModal} key={index} />
                   ))}
@@ -354,7 +355,7 @@ export default function SingleSection(props) {
               }
             </TabPane>
             <TabPane tab={texts.jsonPreview} key="2">
-              <ReactJson theme="solarized" src={sectionData} />
+              <ReactJson theme="solarized" src={sectionData} name="Section"/>
             </TabPane>
           </STabs>
         </Content>

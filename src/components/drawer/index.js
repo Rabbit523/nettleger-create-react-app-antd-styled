@@ -1,9 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import ReactJson from 'react-json-view';
+import { isMobile } from 'react-device-detect';
 import { Drawer, Button, Input, Divider } from 'antd';
 import { PlusCircleOutlined } from '@ant-design/icons';
-import { texts } from '../../constant';
+import { texts, pageModelValidationJson, modelValidationJson } from '../../constant';
 
 const SDrawer = styled(Drawer)`
   .ant-drawer-content {
@@ -54,7 +56,7 @@ export default function SideDrawer(props) {
   const { visible, onClose, onAdd, type, fields } = props;  
   return (
     <SDrawer
-      width={360}
+      width={isMobile ? '80%' : 360}
       placement='right'
       closable={false}
       onClose={onClose}
@@ -76,6 +78,28 @@ export default function SideDrawer(props) {
           <Divider />
           <p>{texts.contentTypeIdDescription}</p>
           <Input defaultValue={type} bordered readOnly/>
+        </div>
+        <div className='s-item'>
+          <label>{type === 'Page' ? texts.pageModelValidation : texts.modelValidation}</label>
+          <Divider />
+          {type === 'Page' ?
+            <ReactJson
+              displayObjectSize={false}
+              displayDataTypes={false}
+              theme="solarized"
+              src={pageModelValidationJson}
+              style={{width: '100%'}}
+              name={type} />
+            : <React.Fragment>
+              <p>{texts.modelValidationDescription}</p>
+              <ReactJson
+                displayObjectSize={false}
+                displayDataTypes={false}
+                theme="solarized"
+                src={modelValidationJson[type]['content']}
+                style={{width: '100%'}}
+                name={modelValidationJson[type]['title']} />
+            </React.Fragment>}
         </div>
         <div className='s-item'>
           <label>{texts.documentation}</label>

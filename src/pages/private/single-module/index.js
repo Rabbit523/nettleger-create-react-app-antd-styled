@@ -25,7 +25,8 @@ const STabs = styled(Tabs)`
   }
   .ant-tabs-content {
     height: 100%;
-    overflow-y: scroll;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 `;
 
@@ -239,7 +240,7 @@ export default function SingleModule(props) {
             <TabPane tab={texts.fields + " (" + nFields + ")"} key="1">
               {isEdit ? 
                 <React.Fragment>
-                  <DraggableDataBox data={moduleName} onClick={updateFieldData}/>
+                  <DraggableDataBox data={moduleName} onSend={updateFieldData}/>
                   {!isEmpty(moduleContent) && Object.values(moduleContent).map((item, index) => (
                     <DraggableInfoBox data={item} key={index} onClick={handleDeleteItem}/>
                   ))}
@@ -247,7 +248,7 @@ export default function SingleModule(props) {
                 :
                 <React.Fragment>
                   {isEmpty(moduleContent) && isEmpty(moduleName) && <SkeletonTypography />}
-                  {!isEmpty(moduleName) && <DraggableDataBox data={moduleName} onClick={updateFieldData}/>}
+                  {!isEmpty(moduleName) && <DraggableDataBox data={moduleName} onSend={updateFieldData}/>}
                   {!isEmpty(moduleContent) && Object.values(moduleContent).map((item, index) => (
                     <DraggableInfoBox data={item} key={index} onClick={handleDeleteItem} />
                   ))}
@@ -255,7 +256,7 @@ export default function SingleModule(props) {
               }
             </TabPane>
             <TabPane tab={texts.jsonPreview} key="2">
-              <ReactJson theme="solarized" src={moduleData} />
+              <ReactJson theme="solarized" src={moduleData} name="Module" />
             </TabPane>
           </STabs>
         </Content>
