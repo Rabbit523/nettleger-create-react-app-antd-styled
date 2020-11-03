@@ -2,7 +2,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import Draggable from 'react-draggable';
 import Dropzone from 'react-dropzone';
-import { isMobile } from 'react-device-detect';
+import ReactJson from 'react-json-view';
+import styled from 'styled-components';
+import { Tabs } from 'antd';
+// import { isMobile } from 'react-device-detect';
 import { Editor } from '@tinymce/tinymce-react';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import { Accordion, AccordionSummary, AccordionDetails, AccordionActions, FormControlLabel, Button, IconButton, Divider, TextField, Radio, RadioGroup } from '@material-ui/core';
@@ -13,6 +16,19 @@ import Notification from '../notification';
 import ApiService from "../../service/api.service";
 import { texts, svgIcons } from '../../constant';
 
+const { TabPane } = Tabs;
+const STabs = styled(Tabs)`
+  height: 100%;
+  width: 100%;
+  .ant-tabs-tab-btn {
+    text-transform: capitalize;
+  }
+  .ant-tabs-content {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+`;
 const useStyles = makeStyles({
   customMargin: {
     marginRight: 15
@@ -31,7 +47,6 @@ const useStyles = makeStyles({
     cursor: 'pointer'
   }
 });
-
 const GreenRadio = withStyles({
   root: {
     color: green[400],
@@ -42,16 +57,42 @@ const GreenRadio = withStyles({
   checked: {},
 })((props) => <Radio color="default" {...props} />);
 
+function isEmpty(obj) {
+  for(var key in obj) {
+    if(obj.hasOwnProperty(key))
+      return false;
+  }
+  return true;
+};
+
 export default function DraggableDataBox(props) {
   const classes = useStyles();
-  const { data, onClick } = props;
+  const { data, updatedJsonData, onSend, onDetail, sections, modules } = props;
+  const [sectionData, setSectionData] = useState({});
+  const [moduleData, setModuleData] = useState({});
+  const [moduleId, setModuleId] = useState("");
   const [input, setInputValue] = useState("");
   const [richContent, setRichContent] = useState("");
   const [file, setFile] = useState("");
 
   useEffect(() => {
     data.val && setInputValue(data.val);
-  }, [data]);
+    if (!isEmpty(sections)) {
+      const section = sections.find((item) => item.name === data.name);
+      if (!isEmpty(section)) {
+        const content = JSON.parse(section.content);
+        setSectionData(content);
+      }
+    }
+    if (!isEmpty(modules)) {
+      const module_ = modules.find((item) => item.name === data.name);
+      if (!isEmpty(module_)) {
+        const content = JSON.parse(module_.content);
+        setModuleData(content);
+        setModuleId(module_.id);
+      }
+    }
+  }, [data, sections, modules, updatedJsonData]);
 
   const handleChange = (e) => {
     setInputValue(e.target.value);
@@ -62,10 +103,14 @@ export default function DraggableDataBox(props) {
   const handleSaveData = () => {
     const res = {
       name: data.name,
-      val: data.type === 'RichText' ? richContent : data.type === 'Media' ? file : input
+      val: data.type === 'RichText' ? richContent : data.type === 'Media' ? file : data.type === 'Module' ? 'module' : input,
+      moduleId
     };
-    onClick(res);
+    onSend(res);
   };
+  const handleDetailView = () => {
+    onDetail(data);
+  }
 
   const onDrop = useCallback((acceptedFiles) => {
     acceptedFiles.forEach((file) => {
@@ -86,7 +131,7 @@ export default function DraggableDataBox(props) {
   }, []);
 
   return (
-    <Draggable disabled={isMobile}>
+    <Draggable disabled={true}>
       <Accordion>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
@@ -94,11 +139,10 @@ export default function DraggableDataBox(props) {
         >
           <IconButton size="small" className={classes.customMargin}><MoreOutlined /></IconButton>
           <FormControlLabel
-            aria-label="Acknowledge"
             onClick={(event) => event.stopPropagation()}
             onFocus={(event) => event.stopPropagation()}
             control={<img alt="" className={classes.customMargin} src={svgIcons[data.type]} />}
-            label={data.name === 'name' ? data.name + ' (required)' : data.name}
+            label={(data.name === 'name' || data.name === 'meta_title' || data.name === 'meta_description')? data.name + ' (required)' : data.name}
           />
         </AccordionSummary>
         <AccordionDetails>
@@ -203,18 +247,35 @@ export default function DraggableDataBox(props) {
               {({getRootProps, getInputProps, isDragActive, isDragReject}) => (
                 <div className={classes.dropZone} {...getRootProps()}>
                   <input {...getInputProps()} />
-                  {!isDragActive && 'Click here or drop a file to upload!'}
-                  {isDragActive && !isDragReject && "Drop it like it's hot!"}
-                  {isDragReject && "File type not accepted, sorry!"}
+                  {file && texts.dropzoneQue[0] + file}
+                  {file && (<br/>)}
+                  {!isDragActive && texts.dropzoneQue[1]}
+                  {isDragActive && !isDragReject && texts.dropzoneQue[2]}
+                  {isDragReject && texts.dropzoneQue[3]}
                 </div>
               )}
             </Dropzone>
           )}
-
+          {data.type === 'Module' && (
+            <React.Fragment>
+              {updatedJsonData.length > 0 ? <STabs defaultActiveKey="1">
+                <TabPane tab={texts.originModuleModel} key="1">
+                  <ReactJson theme="solarized" src={moduleData} style={{width: '100%'}}/>
+                </TabPane>
+                <TabPane tab={texts.sectionmoduleData} key="2">
+                  <ReactJson theme="solarized" src={updatedJsonData} style={{width: '100%'}}/>
+                </TabPane>
+              </STabs> : <ReactJson theme="solarized" src={moduleData} style={{width: '100%'}}/>}
+            </React.Fragment>
+          )}
+          {data.type === 'Section' && (
+            <ReactJson theme="solarized" src={sectionData} style={{width: '100%'}}/>
+          )}
         </AccordionDetails>
         <Divider />
         <AccordionActions>
           <Button size="small">{texts.cancel}</Button>
+          {(data.type === 'Module' || data.type === 'Section') &&<Button size="small" color="primary" onClick={handleDetailView}>{texts.edit}</Button>}
           <Button size="small" color="primary" onClick={handleSaveData}>{texts.save}</Button>
         </AccordionActions>
       </Accordion>
@@ -224,5 +285,5 @@ export default function DraggableDataBox(props) {
 
 DraggableDataBox.propTypes = {
   data: PropTypes.object.isRequired,
-  onClick: PropTypes.func.isRequired
+  onSend: PropTypes.func.isRequired
 };

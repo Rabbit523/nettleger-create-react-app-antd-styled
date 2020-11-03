@@ -67,34 +67,50 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
-export default function SelectModuleModal(props) {
-  const { open, type, modules, handleClose, handleClick, handleBack } = props;
+export default function SelectModal(props) {
+  const { open, type, data, handleClose, handleClick, handleBack } = props;
   const [errors, setErrors] = useState({ idError: false, dirError: false, amountError: false });
   const [direction, setDirection] = useState('');
   const [amount, setAmount] = useState('');
-  const [moduleId, setModuleId] = useState('');
+  const [id, setId] = useState('');
   const classes = useStyles();
 
   const onSubmit = () => {
-    if (moduleId && amount && direction) {
-      const data = { moduleId, amount, direction };
+    const isValidated = texts[type] === 'Module' ? id && amount && direction : id;
+    const data = texts[type] === 'Module' ? { id, amount, direction } : { id };
+    if (isValidated) {
       handleClick(data);
     } else {
-      setErrors({
-        idError: moduleId ? false : true,
+      texts[type] === 'Module' ? setErrors({
+        idError: id ? false : true,
         dirError: direction ? false : true,
         amountError: amount ? false : true
-      });
+      }) : setErrors({idError: id ? false : true});
     }
   };
   const handleIdChange = (e) => {
-    setModuleId(e.target.value);
+    setId(e.target.value);
+    texts[type] === 'Module' ? setErrors({
+      idError: false,
+      dirError: direction ? false : true,
+      amountError: amount ? false : true
+    }) : setErrors({idError: false});
   };
   const handleDirChange = (e) => {
     setDirection(e.target.value);
+    setErrors({
+      idError: id ? false : true,
+      dirError: false,
+      amountError: amount ? false : true
+    });
   };
   const handleAmountChange = (e) => {
     setAmount(e.target.value);
+    setErrors({
+      idError: id ? false : true,
+      dirError: direction ? false : true,
+      amountError: false
+    })
   };
 
   return (
@@ -105,23 +121,24 @@ export default function SelectModuleModal(props) {
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <FormControl variant="outlined" className={classes.formControl}>
-                <InputLabel>{texts.module}</InputLabel>
+                <InputLabel>{texts[type] === 'Module' ? texts.module : texts.section}</InputLabel>
                 <Select
                   native
-                  value={moduleId}
+                  value={id}
                   onChange={handleIdChange}
-                  label={texts.module}
+                  label={texts.select}
                   variant="outlined"
                 >
-                  <option value="none">{texts.Module}</option>
-                  {modules.map((item, index) => (
+                  <option value="none">{texts[type] === 'Module' ? texts.Module : texts.Section}</option>
+                  {data.map((item, index) => (
                     <option key={index} value={item.id}>{item.name}</option>
                   ))}
                 </Select>
                 {errors.idError && <p className={classes.errText}>{texts.validText}</p>}
+                <DialogContentText className={classes.text}>{texts.selectDescription}</DialogContentText>
               </FormControl>
             </Grid>
-            <Grid item xs>
+            {texts[type] === 'Module' && <Grid item xs>
               <TextField
                 autoFocus
                 fullWidth
@@ -134,8 +151,8 @@ export default function SelectModuleModal(props) {
                 />
               {errors.dirError && <p className={classes.errText}>{texts.validText}</p>}
               <DialogContentText className={classes.text}>{texts.nameDescription}</DialogContentText>
-            </Grid>
-            <Grid item xs>
+            </Grid>}
+            {texts[type] === 'Module' && <Grid item xs>
               <TextField
                 autoFocus
                 fullWidth
@@ -148,7 +165,7 @@ export default function SelectModuleModal(props) {
                 />
               {errors.amountError && <p className={classes.errText}>{texts.validText}</p>}
               <DialogContentText className={classes.text}>{texts.fieldIdDescription}</DialogContentText>
-            </Grid>
+            </Grid>}
           </Grid>          
         </DialogContent>
         <DialogActions>
@@ -160,10 +177,10 @@ export default function SelectModuleModal(props) {
   );
 };
 
-SelectModuleModal.propTypes = {
+SelectModal.propTypes = {
   open: PropTypes.bool.isRequired,
   type: PropTypes.string.isRequired,
-  modules: PropTypes.array.isRequired,
+  data: PropTypes.array.isRequired,
   handleClose: PropTypes.func.isRequired,
   handleBack: PropTypes.func.isRequired,
   handleClick: PropTypes.func.isRequired

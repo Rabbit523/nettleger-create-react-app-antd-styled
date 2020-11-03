@@ -9,6 +9,7 @@ export const svgIcons = {
   Date: '/images/dateIcon.svg',
   Reference: '/images/referenceIcon.svg',
   Module: '/images/module.svg',
+  Section: '/images/section.svg',
   Button: '/images/buttonOutline.svg',
   background: '/images/bg.svg',
   logo: '/images/nettleger-logo-color.svg',
@@ -29,25 +30,29 @@ export const moduleFieldTypes = [
     title: 'Text',
     description: 'Titles, names, paragraphs, list of names'
   },
-  { id: 3,
+  {
+    id: 3,
     type: 'Number',
     svg: '/images/number.svg',
     title: 'Number',
     description: 'ID, order number, rating, quantity'
   },
-  { id: 4,
+  {
+    id: 4,
     type: 'Date',
     svg: '/images/date.svg',
     title: 'Date and time',
     description: 'Event dates'
   },
-  { id: 5,
+  {
+    id: 5,
     type: 'Media',
     svg: '/images/media.svg',
     title: 'Media',
     description: 'Images, videos PDFs and other files'
   },
-  { id: 6,
+  {
+    id: 6,
     type: 'Button',
     svg: '/images/button.svg',
     title: 'Button',
@@ -69,13 +74,15 @@ export const sectionFieldTypes = [
     title: 'Text',
     description: 'Titles, names, paragraphs, list of names'
   },
-  { id: 3,
+  {
+    id: 3,
     type: 'Number',
     svg: '/images/number.svg',
     title: 'Number',
     description: 'ID, order number, rating, quantity'
   },
-  { id: 4,
+  {
+    id: 4,
     type: 'Media',
     svg: '/images/media.svg',
     title: 'Media',
@@ -87,6 +94,43 @@ export const sectionFieldTypes = [
     svg: '/images/module.svg',
     title: 'Module',
     description: 'Select a module and make them as a group'
+  }
+];
+export const pageFieldTypes = [
+  {
+    id: 1,
+    type: 'RichText',
+    svg: '/images/rich-text.svg',
+    title: 'Rich text',
+    description: 'Text formatting with references and media'
+  },
+  {
+    id: 2,
+    type: 'Text',
+    svg: '/images/text.svg',
+    title: 'Text',
+    description: 'Titles, names, paragraphs, list of names'
+  },
+  {
+    id: 3,
+    type: 'Number',
+    svg: '/images/number.svg',
+    title: 'Number',
+    description: 'ID, order number, rating, quantity'
+  },
+  {
+    id: 4,
+    type: 'Media',
+    svg: '/images/media.svg',
+    title: 'Media',
+    description: 'Images, videos PDFs and other files'
+  },
+  {
+    id: 5,
+    type: 'Section',
+    svg: '/images/section.svg',
+    title: 'Section',
+    description: 'Select a section and manage module group'
   }
 ];
 export const moduleHeadCells = [
@@ -109,6 +153,30 @@ export const pageHeadCells = [
   { id: 'time', align: true, disablePadding: false, label: 'Oppdatert tid' },
   { id: 'action', align: true, disablePadding: false, label: 'Handling' },
 ];
+export const pageModelValidationJson = {
+  name: 'Required',
+  meta_title: 'Required',
+  meta_description: 'Required',
+  slug: 'Page URL',
+  type: 'Single/Multiple',
+  sections: 'Group of sections'
+};
+export const modelValidationJson = {
+  seksjon: {
+    title: 'Section',
+    content: {
+      name: 'Required',
+      content: 'Group of modules'
+    }
+  },
+  modul: {
+    title: 'Module',
+    content: {
+      name: 'Required',
+      content: 'Group of fields'
+    }
+  }
+};
 export const texts = {
   siteTitle: 'Nettleger CMS Backend',
   dashboard: 'Dashboard',
@@ -143,6 +211,9 @@ export const texts = {
   contentType: 'Innholdstype',
   contentTypeId: 'INNHOLDSTYPE ID',
   contentTypeIdDescription: 'Bruk denne ID-en til å hente alt relatert til denne innholdstypen via API-en.',
+  pageModelValidation: 'Validering av sidemodell',
+  modelValidation: 'Modellvalidering',
+  modelValidationDescription: 'Navnefeltet skal defineres, og det kan ikke være tomt.',
   details: 'detaljer',
   fields: 'enger',
   fieldsDescription: {'first': 'Innholdstypen har brukt', 'second': 'av 50 felt.'},
@@ -165,8 +236,11 @@ export const texts = {
   name: 'Navn',
   nameDescription: 'Den vises i oppføringsredigereren',
   fieldId: 'Felt ID',
-  fieldIdDescription: 'Den genereres automatisk basert på navnet og vises i API-svarene',
+  fieldIdDescription: 'Den brukes til elementidentitet.',
+  select: 'Plukke ut',
+  selectDescription: 'Velg en gjenstand',
   save: 'Lagre',
+  edit: 'Redigere',
   cancel: 'Avbryt',
   yes: 'Ja',
   no: 'Nei',
@@ -185,41 +259,20 @@ export const texts = {
   Json: 'Nytt JSON-objektfelt',
   Reference: 'Nytt referansefelt',
   Module: 'Velg en modul',
+  Section: 'Velg en seksjon',
   dateTime: 'Dato tid',
   number: 'Nummer',
   notificationErr: 'Feil oppsto',
-  notificationErrMsg: {name: 'Det kreves et navnefelt.', duplicate: 'Et navnefelt kan ikke dupliseres.', upload: 'Opplasting mislyktes.'},
+  notificationErrMsg: {name: 'Det kreves et navnefelt.', duplicate: 'Et navnefelt kan ikke dupliseres.', upload: 'Opplasting mislyktes.', page: 'Kontroller validering av sidemodell.'},
   notificationSuccess: 'Suksess',
   notificationSuccessMsg: {upload: 'laste opp vellykket!', delete: 'Slette data er vellykket.'},
   notificationInfo: 'Informasjon',
   jsonPreview: 'Forhåndsvisning av JSON',
   direction: 'Retning',
   fieldModuleAmount: 'Antall moduler',
-};
-
-export const customPageData = {
-  id: "",
-  entry: "",
-  type: "",
-  fields: [
-    {
-      id: "slug",
-      name: "slug",
-      type: "text",
-      required: true
-    },
-    {
-      id: "metaTitle",
-      name: "meta_title",
-      type: "text",
-      required: true
-    },
-    {
-      id: "metaDescription",
-      name: "meta_description",
-      type: "RichText",
-      required: false
-    }
-  ],
-  sections: []
+  editSectionData: 'Rediger seksjonsdata for siden',
+  editModuleData: 'Rediger moduldata for siden',
+  originModuleModel: 'Original modulmodell',
+  sectionmoduleData: 'Seksjonsmoduldata',
+  dropzoneQue: ['Sti:', 'Klikk her eller slipp en fil for å laste den opp!', 'Slipp det som det er varmt!', 'Filtype aksepteres ikke, beklager!']
 };

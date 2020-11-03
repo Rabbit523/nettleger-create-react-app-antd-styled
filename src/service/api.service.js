@@ -12,7 +12,7 @@ class ApiService {
 
   getAllModule() {
     return axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/api/module/getAll`,)
+      .get(`${process.env.REACT_APP_BACKEND_URL}/api/module/getAll`)
       .then(response => {
         return response.data;
       });
@@ -73,7 +73,7 @@ class ApiService {
 
   getAllSection() {
     return axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/api/section/getAll`,)
+      .get(`${process.env.REACT_APP_BACKEND_URL}/api/section/getAll`)
       .then(response => {
         return response.data;
       });
@@ -97,7 +97,7 @@ class ApiService {
 
   createPage(data) {
     return axios
-      .post(`${process.env.REACT_APP_BACKEND_URL}/api/page/create`, { data })
+      .post(`${process.env.REACT_APP_BACKEND_URL}/api/page/create`, data)
       .then(response => {
         return response.data;
       });
@@ -105,7 +105,15 @@ class ApiService {
 
   getPage(id) {
     return axios
-      .post(`${process.env.REACT_APP_BACKEND_URL}/api/page/get`, { id })
+      .post(`${process.env.REACT_APP_BACKEND_URL}/api/page/get`, id)
+      .then(response => {
+        return response.data;
+      });
+  }
+
+  getAllPage() {
+    return axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/api/page/getAll`)
       .then(response => {
         return response.data;
       });
@@ -119,9 +127,9 @@ class ApiService {
       });
   }
 
-  deletePage(ids) {
+  deletePage(id) {
     return axios
-      .post(`${process.env.REACT_APP_BACKEND_URL}/api/page/delete`, { ids })
+      .post(`${process.env.REACT_APP_BACKEND_URL}/api/page/delete`, id)
       .then(response => {
         return response.data;
       });

@@ -22,6 +22,7 @@ function Sections(props) {
   const [currentPath, setCurrentPath] = useState('');
 
   useEffect(() => {
+    setLoading(true);
     ApiService.getAllSection().then(result => {
       let data = [];
       Object.values(result).map(row => {
@@ -38,7 +39,6 @@ function Sections(props) {
       Notification({title: texts.notificationErr, description: resMessage, type: 'error'});
       setLoading(false);
     });
-    setRowData([]);
     const pathname = props.location.pathname.split('/')[2];
     setCurrentPath(pathname);
   }, [props]);
