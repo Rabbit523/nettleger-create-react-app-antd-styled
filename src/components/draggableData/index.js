@@ -76,7 +76,16 @@ export default function DraggableDataBox(props) {
   const [file, setFile] = useState("");
 
   useEffect(() => {
-    data.val && setInputValue(data.val);
+    if(data.val) {
+      if (data.type === 'Text') {
+        setInputValue(data.val);
+      } else if (data.type === 'RichText') {
+        setRichContent(data.val);
+      } else if (data.type === 'Media') {
+        setFile(data.val);
+      }
+    }
+
     if (!isEmpty(sections)) {
       const section = sections.find((item) => item.name === data.name);
       if (!isEmpty(section)) {
@@ -101,12 +110,18 @@ export default function DraggableDataBox(props) {
     setRichContent(editor.getContent());
   };
   const handleSaveData = () => {
-    const res = {
+    let res = {
       name: data.name,
-      val: data.type === 'RichText' ? richContent : data.type === 'Media' ? file : data.type === 'Module' ? 'module' : input,
-      moduleId
+      val: data.type === 'RichText' ? richContent : data.type === 'Media' ? file : data.type === 'Module' ? 'module' : input
     };
-    onSend(res);
+    if (data.type !== 'Module' && data.type !== 'Section') {
+      onSend(res);
+    } else {
+      if (moduleId) {
+        res['moduleId'] = moduleId;
+        onSend(res);
+      }
+    }
   };
   const handleDetailView = () => {
     onDetail(data);

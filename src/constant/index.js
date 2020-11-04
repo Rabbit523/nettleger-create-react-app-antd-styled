@@ -274,5 +274,5 @@ export const texts = {
   editModuleData: 'Rediger moduldata for siden',
   originModuleModel: 'Original modulmodell',
   sectionmoduleData: 'Seksjonsmoduldata',
-  dropzoneQue: ['Sti:', 'Klikk her eller slipp en fil for å laste den opp!', 'Slipp det som det er varmt!', 'Filtype aksepteres ikke, beklager!']
+  dropzoneQue: ['Sti: ', 'Klikk her eller slipp en fil for å laste den opp!', 'Slipp det som det er varmt!', 'Filtype aksepteres ikke, beklager!']
 };

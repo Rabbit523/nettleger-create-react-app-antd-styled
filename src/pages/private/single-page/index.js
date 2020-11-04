@@ -101,10 +101,27 @@ export default function SinglePage(props) {
         if (props.location.state) {
           setIsEdit(true);
           setLoading(true);
-          setPageId(props.location.state);
+          setPageId(props.location.state.pageId);
           ApiService.getPage(props.location.state).then((response) => {
-            setPageData(response);
-            setNFields(response.fields.length);
+            let pageData = {};
+            let pageContent = response.page_content ? JSON.parse(response.page_content) : {};
+            let nFields = 0;
+            Object.keys(response).forEach((key) => {
+              if (pageContent.hasOwnProperty(key)) {
+                pageContent[key]['val'] = response[key];
+              }
+              if (key !== 'id' && key !== 'date' && key !== 'status' && key !== 'page_content') {
+                if (key === 'sections') {
+                  pageData[key] = JSON.parse(response[key]);
+                } else {
+                  pageData[key] = response[key];
+                }
+                nFields ++;
+              }
+            });
+            setPageContent(pageContent);
+            setPageData(pageData);
+            setNFields(nFields);
             setLoading(false);
           });
         }
@@ -183,7 +200,17 @@ export default function SinglePage(props) {
     const section = sections.find((item) => item.name === data.name);
     let sectionContent = JSON.parse(section.content);
     let updatedData = {...sectionContent};
-
+    console.log(pageData);
+    Object.keys(sectionContent).forEach((key) => {
+      if (pageData.hasOwnProperty('sections')) {
+        const sectionData = pageData.sections[data.name];
+        if (key !== 'modules') {
+          sectionContent[key]['val'] = sectionData[key];
+        } else {
+          // set module values
+        }
+      }
+    });
     if (sectionContent.hasOwnProperty('modules')) {
       delete sectionContent['modules'];
       updatedData.modules.forEach((sel) => {
@@ -209,11 +236,9 @@ export default function SinglePage(props) {
       if (key === param.obj) {
         if (param.hasOwnProperty('type')) {
           const selectedModuleIndex = data['sections'][key]['modules'].findIndex((sel) => parseInt(sel.moduleId) === param.moduleId);
-          console.log({selectedModuleIndex});
           // data key value will save module data for page
           if (selectedModuleIndex >= 0) {
             let selectedModule = data['sections'][key]['modules'][selectedModuleIndex];
-            console.log({selectedModule});
             selectedModule['content'] = param.content;
           }
         } else {
@@ -225,20 +250,23 @@ export default function SinglePage(props) {
   };
   // Save page data to DB
   const savePage = () => {
-    // validate something
+    // validate page props   
     if (!pageValidation(pageData)) {
       Notification({title: texts.notificationErr, description: texts.notificationErrMsg.page, type: 'error'});
     } else {
-      setLoading(true);
+      // setLoading(true);
+      const req = {...pageData};
+      req.page_content = pageContent;
+      console.log(req);
       if (isEdit) {
-        ApiService.updatePage(pageId, pageData).then(() => {
+        ApiService.updatePage(pageId, req).then(() => {
           window.location.reload();
         }).catch((error) => {
           const resMessage = (error.response && error.response.data && error.response.data.message) || error.message || error.toString();
           Notification({title: texts.notificationErr, description: resMessage, type: 'error'});
         });
       } else {
-        ApiService.createPage(pageData).then((response) => {
+        ApiService.createPage(req).then((response) => {
           window.location.reload();
         }).catch((error) => {
           const resMessage = (error.response && error.response.data && error.response.data.message) || error.message || error.toString();
@@ -249,16 +277,14 @@ export default function SinglePage(props) {
   };
   // Set Sub page header buttons
   const detailButtons = !isEdit ? [
-    <Dropdown overlay={menu} key="1">
-      <Button>{texts.actions} <CaretDownOutlined /></Button>
-    </Dropdown>,
-    <Button key="2" type="primary" onClick={savePage}>{texts.save}</Button>,
-    <Button key="3" onClick={openDrawer} className="btn-drawer"> <MoreOutlined /> </Button>
+    <Button key="1" type="primary" onClick={savePage}>{texts.save}</Button>,
+    <Button key="2" onClick={openDrawer} className="btn-drawer"> <MoreOutlined /> </Button>
   ] : [
     <Dropdown overlay={menu} key="1">
       <Button>{texts.actions} <CaretDownOutlined /></Button>
     </Dropdown>,
-    <Button key="2" type="primary"> {texts.save}</Button>
+    <Button key="2" type="primary" onClick={savePage}> {texts.save}</Button>,
+    <Button key="3" onClick={openDrawer} className="btn-drawer"> <MoreOutlined /> </Button>
   ];
 
   return (
