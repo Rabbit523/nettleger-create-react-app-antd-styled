@@ -255,16 +255,23 @@ export default function SinglePage(props) {
     if (!pageValidation(pageData)) {
       Notification({title: texts.notificationErr, description: texts.notificationErrMsg.page, type: 'error'});
     } else {
-      // setLoading(true);
+      setLoading(true);
       const req = {...pageData};
       req.page_content = pageContent;
-      console.log(req);
+      if (!req.page_content.hasOwnProperty('type')) { // type field is required but it will be saved as a single automatically
+        req.page_content['type'] = {
+          "type":"Text",
+          "id":"type",
+          "name":"type"
+        };
+      }
       if (isEdit) {
         ApiService.updatePage(pageId, req).then(() => {
           window.location.reload();
         }).catch((error) => {
           const resMessage = (error.response && error.response.data && error.response.data.message) || error.message || error.toString();
           Notification({title: texts.notificationErr, description: resMessage, type: 'error'});
+          setLoading(false);
         });
       } else {
         ApiService.createPage(req).then((response) => {
@@ -272,6 +279,7 @@ export default function SinglePage(props) {
         }).catch((error) => {
           const resMessage = (error.response && error.response.data && error.response.data.message) || error.message || error.toString();
           Notification({title: texts.notificationErr, description: resMessage, type: 'error'});
+          setLoading(false);
         });
       }
     }
