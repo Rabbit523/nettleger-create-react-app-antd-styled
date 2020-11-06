@@ -87,6 +87,7 @@ export default function SinglePage(props) {
   const [modules, setModules] = useState([]);
   const [sections, setSections] = useState([]);
   const [selectedSection, setSelectedSection] = useState({});
+  const [selectedModule, setSelectedModule] = useState([]);
   const [pageContent, setPageContent] = useState({});
   const [pageData, setPageData] = useState({});
   const [detailModalTitle, setDetailModalTitle] = useState('');
@@ -200,14 +201,14 @@ export default function SinglePage(props) {
     const section = sections.find((item) => item.name === data.name);
     let sectionContent = JSON.parse(section.content);
     let updatedData = {...sectionContent};
-    console.log(pageData);
     Object.keys(sectionContent).forEach((key) => {
       if (pageData.hasOwnProperty('sections')) {
         const sectionData = pageData.sections[data.name];
-        if (key !== 'modules') {
+        if (key !== 'modules' && typeof sectionData[key] != 'object') {
           sectionContent[key]['val'] = sectionData[key];
         } else {
           // set module values
+          setSelectedModule(sectionData[key]);
         }
       }
     });
@@ -330,6 +331,7 @@ export default function SinglePage(props) {
             visible={isDetailDrawer}
             onClose={closeDetailDrawer}
             data={!isEmpty(selectedSection) && selectedSection.content}
+            updatedModule={selectedModule}
             name={!isEmpty(selectedSection) && selectedSection.name}
             modules={modules}
             handleSend={updateSectionData}

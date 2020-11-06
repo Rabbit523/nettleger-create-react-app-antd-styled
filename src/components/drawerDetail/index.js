@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { isMobile } from 'react-device-detect';
@@ -33,19 +33,33 @@ function isEmpty(obj) {
 };
 
 export default function DrawerDetail(props) {
-  const { visible, onClose, handleSend, modules, data, name } = props;
+  const { visible, onClose, handleSend, modules, data, updatedModule, name } = props;
   const [isDetailDrawer, setDetailDrawer] = useState(false);
-  const [moduleContent, setModuleContent] = useState({});
-  const [moduleAmount, setModuleAmount] = useState([]);
   const [moduleData, setModuleData] = useState([]);
+  const [updatedData, setUpdateData] = useState([]);
   const [activeKey, setActiveKey] = useState("0");
   
+  useEffect(() => {
+    if (updatedModule.length > 0) {
+      modules.forEach((module) => {
+        if (data.hasOwnProperty(module.name)) {
+          const existingModule = modules.find((sel) => sel.name === module.name);
+          const selectedModuleUpdated = updatedModule.find((sel) => parseInt(sel.moduleId) === existingModule.id);
+          setUpdateData(selectedModuleUpdated.content);
+        }
+      });
+    }
+    if (moduleData.length > 0) {
+      setDetailDrawer(true);
+    }
+  }, [updatedModule, moduleData, data, modules]);
+
   const onHandleSend = (param) => {
     let res = {...param};
     res['obj'] = name;
     if (param.val === 'module') {
       res['type'] = param.val;
-      res['content'] = moduleData;
+      res['content'] = updatedData;
       res['moduleId'] = param.moduleId;
     }
     handleSend(res);
@@ -53,14 +67,27 @@ export default function DrawerDetail(props) {
   const onHandleDetail = (param) => {
     const selectedModule = modules.find((sel) => sel.name === param.name);
     const moduleContent = !isEmpty(selectedModule) && JSON.parse(selectedModule.content);
-    const moduleX = Array.from(Array(parseInt(param.amount)).keys());
-    setModuleContent(moduleContent);
-    setModuleAmount(moduleX);
-    setDetailDrawer(true);
+    let moduleData = [];
+    for (let i = 0; i <param.amount; i ++) {
+      moduleData.push(JSON.parse(JSON.stringify(moduleContent)));
+    }
+
+    if (updatedModule) {
+      const selectedModuleUpdated = updatedModule.find((sel) => parseInt(sel.moduleId) === selectedModule.id);
+      const selectedModuleContent = {...selectedModuleUpdated.content};
+      moduleData.forEach((item, key) => {
+        Object.keys(item).forEach((sel) => {
+          if (selectedModuleContent[key].hasOwnProperty(sel)) {
+            item[sel].val = selectedModuleContent[key][sel];
+          }
+        });
+      });
+    }
+    setModuleData(moduleData);
   };
   const onHandleModuleSend = (param) => {
     // update all module values on detail box and save when save button clicked
-    let res = [...moduleData];
+    let res = [...updatedData];
     if (res[activeKey]) {
       res[activeKey][param.name] = param.val;
     } else {
@@ -68,7 +95,7 @@ export default function DrawerDetail(props) {
       obj[param.name] = param.val;
       res[activeKey] = obj;
     }
-    setModuleData(res);
+    setUpdateData(res);
   };
   const onDetailClose = () => {
     setDetailDrawer(false);
@@ -94,10 +121,10 @@ export default function DrawerDetail(props) {
         visible={isDetailDrawer}
         title={texts.editModuleData}
       >
-        <STabs activeKey={activeKey} onChange={onTabChange}>
-          {moduleAmount.map((item) => (
-            <TabPane tab={"Tab" + item} key={item}>
-              {Object.values(moduleContent).map((sel, index) => (
+        <STabs activeKey={activeKey} defaultActiveKey="0" onChange={onTabChange}>
+          {moduleData.map((item, key) => (
+            <TabPane tab={"Tab" + key} key={key}>
+              {Object.values(item).map((sel, index) => (
                 <DraggableDataBox data={sel} onSend={onHandleModuleSend} key={index} />
               ))}
             </TabPane>
@@ -105,7 +132,7 @@ export default function DrawerDetail(props) {
         </STabs>
       </SDrawer>
       {Object.values(data).map((item, index) => (
-        <DraggableDataBox data={item} updatedJsonData={moduleData} onSend={onHandleSend} onDetail={onHandleDetail} modules={modules} key={index} />
+        <DraggableDataBox data={item} updatedJsonData={updatedData} onSend={onHandleSend} onDetail={onHandleDetail} modules={modules} key={index} />
       ))}
     </SDrawer>
   );

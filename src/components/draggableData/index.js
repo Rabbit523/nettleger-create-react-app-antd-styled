@@ -77,7 +77,7 @@ export default function DraggableDataBox(props) {
 
   useEffect(() => {
     if(data.val) {
-      if (data.type === 'Text') {
+      if (data.type === 'Text' || data.type === 'Button' || data.type === 'Date' || data.type === 'Number') {
         setInputValue(data.val);
       } else if (data.type === 'RichText') {
         setRichContent(data.val);
@@ -134,6 +134,7 @@ export default function DraggableDataBox(props) {
       const reader = new FileReader();
 			reader.onload = function (e) {
         ApiService.fileUpload(formData).then((res) => {
+          console.log({res});
           setFile(res.path);
           Notification({title: texts.notificationSuccess, description: texts.notificationSuccessMsg.upload, type: 'success'});
         }).catch((error) => {
@@ -219,6 +220,7 @@ export default function DraggableDataBox(props) {
               className={classes.textField}
               type="datetime-local"
               variant="outlined"
+              value={input}
               InputLabelProps={{
                 shrink: true,
               }}
@@ -232,6 +234,7 @@ export default function DraggableDataBox(props) {
               margin="dense"
               type="number"
               variant="outlined"
+              value={input}
               onChange={handleChange}
               label={texts.number}
             />

@@ -117,7 +117,7 @@ export default function SingleSection(props) {
       const resMessage = (error.response && error.response.data && error.response.data.message) || error.message || error.toString();
       Notification({title: texts.notificationErr, description: resMessage, type: 'error'});
     });
-  }, [props]);
+  }, [props, sectionData]);
   // FieldTypes Modal Callbacks
   const openSelectFieldDialog = () => {
     setFieldSelectModal(true);
