@@ -2,7 +2,8 @@ import Home from '../pages/public/home';
 import LoginPage from '../pages/auth/login';
 import Pages from '../pages/private/pages';
 import SinglePage from '../pages/private/single-page';
-import Steps from '../pages/private/steps';
+import Treatments from '../pages/private/treatments';
+import SingleTreatment from '../pages/private/single-treatment';
 import Modules from '../pages/private/modules';
 import SingleModule from '../pages/private/single-module';
 import Sections from '../pages/private/sections';
@@ -41,10 +42,22 @@ const routes = [
     component: SinglePage
   },
   {
-    path: '/admin/steps',
+    path: '/admin/treatments',
     exact: true,
     auth: true,
-    component: Steps
+    component: Treatments
+  },
+  {
+    path: '/admin/treatments/create',
+    exact: true,
+    auth: true,
+    component: SingleTreatment
+  },
+  {
+    path: '/admin/treatments/edit/:treatmentId',
+    exact: true,
+    auth: true,
+    component: SingleTreatment
   },
   {
     path: '/admin/modules',

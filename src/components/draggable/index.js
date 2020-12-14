@@ -30,7 +30,7 @@ const SAccodionSummary = styled.div`
   }
 `;
 export default function DraggableInfoBox(props) {
-  const { data, onClick, openDetailModule } = props;
+  const { data, onClick, openDetailModule, openEditForm } = props;
 
   const onConfirm = () => {
     onClick(data);
@@ -42,6 +42,7 @@ export default function DraggableInfoBox(props) {
 
   const onDetail = () => {
     (data.type === 'Module' || data.type === 'Section') && openDetailModule(data);
+    data.type === 'FormGroup' && openEditForm(data);
   }
 
   return (
@@ -55,7 +56,7 @@ export default function DraggableInfoBox(props) {
             label={data.name}
           />
         </SAccodionSummary>
-        {data.name !== 'name' && 
+        {data.name !== 'name' && data.type !== 'Treatment' &&
           <Popconfirm
             title={texts.deleteFieldQue}
             onConfirm={onConfirm}
@@ -75,6 +76,5 @@ export default function DraggableInfoBox(props) {
 };
 
 DraggableInfoBox.propTypes = {
-  data: PropTypes.object.isRequired,
-  onClick: PropTypes.func.isRequired
+  data: PropTypes.object.isRequired
 };

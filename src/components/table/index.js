@@ -155,6 +155,7 @@ export default function EnhancedTable(props) {
                       <TableCell align="right">{row.name}</TableCell>
                       {tableName === 'Sider' && <TableCell align="right">{row.slug}</TableCell>}
                       {tableName === 'Sider' && <TableCell align="right">{row.status}</TableCell>}
+                      {tableName === 'Behandlinger' && <TableCell align="right">{row.cost}</TableCell>}
                       <TableCell align="right">{row.time}</TableCell>
                       <TableCell align="right">
                         <Tooltip title={texts.details}>

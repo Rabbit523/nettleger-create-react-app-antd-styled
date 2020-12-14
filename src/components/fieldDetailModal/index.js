@@ -66,36 +66,33 @@ const useStyles = makeStyles(() => ({
 
 export default function FieldDetailModal(props) {
   const { open, type, handleClose, handleClick, handleBack } = props;
-  const [errors, setErrors] = useState({ idError: false, nameError: false });
-  const [name, setName] = useState('');
-  const [id, setId] = useState('');
+  const [errors, setErrors] = useState({ id: false, name: false, title: false });
+  const [result, setResult] = useState({ id: '', name: '', title: '', description: '' });
   const classes = useStyles();
 
   const onSubmit = () => {
-    if (name && id) {
-      const data = {type, id, name};
-      handleClick(data);
+    if (type !== 'FormGroup') {
+      if (result.name && result.id ) {
+        handleClick({ type, id: result.id, name: result.name });
+      } else {
+        setErrors({ id: result.id ? false: true, name: result.name ? false : true });
+      }
     } else {
-      setErrors({
-        idError: id ? false : true,
-        nameError: name ? false : true
-      });
+      if (result.title) {
+        handleClick({ type, title: result.title, description: result.description });
+      } else {
+        setErrors({ title: true });
+      }
     }
   };
 
-  const handleNameChange = (e) => {
-    setName(e.target.value);
-    setErrors({
-      idError: id ? false : true,
-      nameError: false
-    });
-  };
-  const handleIdChange = (e) => {
-    setId(e.target.value);
-    setErrors({
-      idError: false,
-      nameError: name ? false : true
-    });
+  const handleFieldChange = (e, type) => {
+    const res = {...result};
+    res[type] = e.target.value;
+    setResult(res);
+    const err = {...errors};
+    err[type] = false;
+    setErrors(err);
   };
 
   return (
@@ -103,36 +100,61 @@ export default function FieldDetailModal(props) {
       <Dialog fullWidth={true} maxWidth='sm' onClose={handleClose} open={open}>
         <DialogTitle onClose={handleClose}>{texts[type]}</DialogTitle>
         <DialogContent dividers>
-          <Grid container spacing={3}>
+          {type !== 'FormGroup' ? <Grid container spacing={3}>
             <Grid item xs>
               <TextField
-                autoFocus
+                required
                 fullWidth
                 margin="dense"
                 type="text"
                 variant="outlined"
-                onChange={handleNameChange}
+                onChange={(e) => handleFieldChange(e, 'name')}
                 label={texts.name}
-                error={errors.nameError}
+                error={errors.name}
                 />
-              {errors.nameError && <p className={classes.errText}>{texts.validText}</p>}
+              {errors.name && <p className={classes.errText}>{texts.validText}</p>}
               <DialogContentText className={classes.text}>{texts.nameDescription}</DialogContentText>
             </Grid>
             <Grid item xs>
               <TextField
-                autoFocus
+                required
                 fullWidth
                 margin="dense"
                 type="text"
                 variant="outlined"
-                onChange={handleIdChange}
+                onChange={(e) => handleFieldChange(e, 'id')}
                 label={texts.fieldId}
-                error={errors.idError}
+                error={errors.id}
                 />
-              {errors.idError && <p className={classes.errText}>{texts.validText}</p>}
+              {errors.id && <p className={classes.errText}>{texts.validText}</p>}
               <DialogContentText className={classes.text}>{texts.fieldIdDescription}</DialogContentText>
             </Grid>
-          </Grid>          
+          </Grid>
+          : <Grid container spacing={3}>
+              <Grid item xs>
+                <TextField
+                  required
+                  fullWidth
+                  margin="dense"
+                  type="text"
+                  variant="outlined"
+                  onChange={(e) => handleFieldChange(e, 'title')}
+                  label={texts.title}
+                  error={errors.title}
+                  />
+                {errors.title && <p className={classes.errText}>{texts.validText}</p>}
+              </Grid>
+              <Grid item xs>
+                <TextField
+                  fullWidth
+                  margin="dense"
+                  type="text"
+                  variant="outlined"
+                  onChange={(e) => handleFieldChange(e, 'description')}
+                  label={texts.description}
+                  />
+              </Grid>
+            </Grid>}
         </DialogContent>
         <DialogActions>
           <Button onClick={onSubmit} color="primary" variant="contained"> {texts.create} </Button>

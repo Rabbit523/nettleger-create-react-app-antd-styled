@@ -94,7 +94,7 @@ class ApiService {
         return response.data;
       });
   }
-
+  // PAGE API
   createPage(data) {
     return axios
       .post(`${process.env.REACT_APP_BACKEND_URL}/api/page/create`, data)
@@ -130,6 +130,46 @@ class ApiService {
   deletePage(id) {
     return axios
       .post(`${process.env.REACT_APP_BACKEND_URL}/api/page/delete`, id)
+      .then(response => {
+        return response.data;
+      });
+  }
+  // TREATMENT API
+  createTreatment(data) {
+    return axios
+      .post(`${process.env.REACT_APP_BACKEND_URL}/api/treatment/create`, data)
+      .then(response => {
+        return response.data;
+      });
+  }
+
+  getTreatment(id) {
+    return axios
+      .post(`${process.env.REACT_APP_BACKEND_URL}/api/treatment/get`, id)
+      .then(response => {
+        return response.data;
+      });
+  }
+
+  getAllTreatments() {
+    return axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/api/treatment/getAll`)
+      .then(response => {
+        return response.data;
+      });
+  }
+
+  updateTreatment(id, data) {
+    return axios
+      .post(`${process.env.REACT_APP_BACKEND_URL}/api/treatment/update`, { id, data })
+      .then(response => {
+        return response.data;
+      });
+  }
+
+  deleteTreatment(id) {
+    return axios
+      .post(`${process.env.REACT_APP_BACKEND_URL}/api/treatment/delete`, id)
       .then(response => {
         return response.data;
       });

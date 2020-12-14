@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Layout, Menu } from 'antd';
-import { SwitcherOutlined, PicRightOutlined, FormOutlined, ApartmentOutlined } from '@ant-design/icons';
+import { SwitcherOutlined, PicRightOutlined, MedicineBoxOutlined, ApartmentOutlined } from '@ant-design/icons';
 import { texts } from '../../constant';
 
 const { Sider } = Layout;
@@ -12,8 +12,8 @@ const SSider = styled(Sider)`
     border-right: 0;
     li {
       margin: 0;
-      height: 58px;
-      line-height: 58px;
+      height: 78px;
+      line-height: 78px;
     }
   }
   span {
@@ -31,8 +31,8 @@ const SItem = styled(Menu.Item)`
   align-items: center;
   justify-content: ${props => props.collapsed === 'true' ? 'center' : 'flex-start'};
   margin: 0 !important;
-  height: 58px !important;
-  line-height: 58px !important;
+  height: 78px !important;
+  line-height: 78px !important;
   padding: 0 24px !important;
 `;
 
@@ -50,8 +50,8 @@ export default function PageSider(props) {
         <SItem key="3" icon={<ApartmentOutlined />} collapsed={collapsed.toString()}>
           <a href="/admin/modules">{texts.modules}</a>
         </SItem>
-        <SItem key="4" icon={<FormOutlined />} collapsed={collapsed.toString()}>
-          <a href="/admin/steps">{texts.steps}</a>
+        <SItem key="4" icon={<MedicineBoxOutlined />} collapsed={collapsed.toString()}>
+          <a href="/admin/treatments">{texts.treatments}</a>
         </SItem>
       </Menu>
     </SSider>

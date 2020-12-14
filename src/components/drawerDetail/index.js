@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { isMobile } from 'react-device-detect';
 import { Tabs, Drawer } from 'antd';
 import DraggableDataBox from '../draggableData';
+import DraggableInfoBox from '../draggable';
 import { texts } from '../../constant';
 
 const { TabPane } = Tabs;
@@ -45,14 +46,17 @@ export default function DrawerDetail(props) {
         if (data.hasOwnProperty(module.name)) {
           const existingModule = modules.find((sel) => sel.name === module.name);
           const selectedModuleUpdated = updatedModule.find((sel) => parseInt(sel.moduleId) === existingModule.id);
-          setUpdateData(selectedModuleUpdated.content);
+          setUpdateData(selectedModuleUpdated.content ? selectedModuleUpdated.content : updatedData);
         }
       });
     }
+  }, [updatedModule, moduleData, data, modules]);
+
+  useEffect(() => {
     if (moduleData.length > 0) {
       setDetailDrawer(true);
     }
-  }, [updatedModule, moduleData, data, modules]);
+  }, [moduleData]);
 
   const onHandleSend = (param) => {
     let res = {...param};
@@ -75,10 +79,13 @@ export default function DrawerDetail(props) {
     if (updatedModule) {
       const selectedModuleUpdated = updatedModule.find((sel) => parseInt(sel.moduleId) === selectedModule.id);
       const selectedModuleContent = {...selectedModuleUpdated.content};
-      moduleData.forEach((item, key) => {
+      (!isEmpty(selectedModuleContent) || !isEmpty(updatedData) ) && moduleData.forEach((item, key) => {
         Object.keys(item).forEach((sel) => {
-          if (selectedModuleContent[key].hasOwnProperty(sel)) {
+          if (!isEmpty(selectedModuleContent) && !isEmpty(selectedModuleContent[key]) && selectedModuleContent[key].hasOwnProperty(sel)) {
             item[sel].val = selectedModuleContent[key][sel];
+          }
+          if (!isEmpty(updatedData) && !isEmpty(updatedData[key]) && updatedData[key].hasOwnProperty(sel)) {
+            item[sel].val = updatedData[key][sel];
           }
         });
       });
@@ -131,9 +138,10 @@ export default function DrawerDetail(props) {
           ))}
         </STabs>
       </SDrawer>
-      {Object.values(data).map((item, index) => (
-        <DraggableDataBox data={item} updatedJsonData={updatedData} onSend={onHandleSend} onDetail={onHandleDetail} modules={modules} key={index} />
-      ))}
+      {Object.values(data).map((item, index) => {
+        return item.type !== 'Treatment' ? <DraggableDataBox data={item} updatedJsonData={updatedData} onSend={onHandleSend} onDetail={onHandleDetail} modules={modules} key={index} />
+          : <DraggableInfoBox data={item} key={index} />
+      })}
     </SDrawer>
   );
 };

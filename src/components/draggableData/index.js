@@ -67,7 +67,7 @@ function isEmpty(obj) {
 
 export default function DraggableDataBox(props) {
   const classes = useStyles();
-  const { data, updatedJsonData, onSend, onDetail, sections, modules } = props;
+  const { data, updatedJsonData, onSend, onDetail, sections, modules, type } = props;
   const [sectionData, setSectionData] = useState({});
   const [moduleData, setModuleData] = useState({});
   const [moduleId, setModuleId] = useState("");
@@ -115,6 +115,9 @@ export default function DraggableDataBox(props) {
       val: data.type === 'RichText' ? richContent : data.type === 'Media' ? file : data.type === 'Module' ? 'module' : input
     };
     if (data.type !== 'Module' && data.type !== 'Section') {
+      if (type) {
+        res['type'] = type;
+      }
       onSend(res);
     } else {
       if (moduleId) {
@@ -181,13 +184,13 @@ export default function DraggableDataBox(props) {
               init={{
                 height: 500,
                 menubar: false,
-                plugins: 'print preview powerpaste casechange importcss tinydrive searchreplace autolink autoresize save directionality advcode visualblocks visualchars fullscreen image link media mediaembed template codesample table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists checklist wordcount tinymcespellchecker a11ychecker imagetools textpattern noneditable help formatpainter permanentpen pageembed charmap tinycomments mentions quickbars linkchecker emoticons advtable',
+                plugins: 'print preview importcss tinydrive searchreplace autolink autoresize save directionality visualblocks visualchars fullscreen image link media template codesample table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists wordcount imagetools textpattern noneditable help charmap quickbars emoticons',
                 mobile: {
                   theme: 'silver',
                   menubar: true,
-                  plugins: 'print preview powerpaste casechange importcss tinydrive searchreplace autolink save directionality advcode visualblocks visualchars fullscreen image link media mediaembed template codesample table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists checklist wordcount tinymcespellchecker a11ychecker textpattern noneditable help formatpainter pageembed charmap mentions quickbars linkchecker emoticons advtable'
+                  plugins: 'print preview importcss tinydrive searchreplace autolink save directionality visualblocks visualchars fullscreen image link media template codesample table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists wordcount textpattern noneditable help charmap quickbars emoticons'
                 },
-                toolbar: 'undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist checklist | forecolor backcolor casechange permanentpen formatpainter removeformat | pagebreak | charmap emoticons | fullscreen  preview save print | insertfile image media pageembed template link anchor codesample | a11ycheck ltr rtl | showcomments addcomment',
+                toolbar: 'undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist checklist | forecolor backcolor casechange permanentpen removeformat | pagebreak | charmap emoticons | fullscreen  preview save print | insertfile image media pageembed template link anchor codesample | a11ycheck ltr rtl | showcomments addcomment',
                 content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
                 tinycomments_mode: 'embedded',      
                 template_cdate_format: '[Date Created (CDATE): %m/%d/%Y : %H:%M:%S]',
@@ -276,7 +279,7 @@ export default function DraggableDataBox(props) {
           )}
           {data.type === 'Module' && (
             <React.Fragment>
-              {updatedJsonData.length > 0 ? <STabs defaultActiveKey="1">
+              {updatedJsonData ? <STabs defaultActiveKey="1">
                 <TabPane tab={texts.originModuleModel} key="1">
                   <ReactJson theme="solarized" src={moduleData} style={{width: '100%'}}/>
                 </TabPane>

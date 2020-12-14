@@ -49,12 +49,21 @@ function findKeyValueCount(key, obj) {
 	});
 	return count;
 };
+function findDuplicatedKeyCount(key, obj) {
+	var count = 0;
+	var keys = Object.keys(obj);
+	keys.forEach(function(k) {
+		if(k.includes(key)) {
+			count += 1;
+		}
+	});
+	return count;
+};
 function isUnique(key, obj) {
 	return findKeyValueCount(key, obj) === 1;
 };
-
 export default function SingleSection(props) {
-  const [isLoading, setLoading] = useState(false);
+  const [isLoading, setLoading] = useState(true);
   const [isFieldSelectModal, setFieldSelectModal] = useState(false);
   const [isDetailModal, setDetailModal] = useState(false);
   const [isModuleDetailModal, setModuleDetailModal] = useState(false);
@@ -76,10 +85,9 @@ export default function SingleSection(props) {
       setModules(resultArr);
       if (props.location.state) {
         setIsEdit(true);
-        setLoading(true);
         setSectionId(props.location.state.sectionId);
         ApiService.getSection(props.location.state).then((response) => {
-          let data = {...sectionData};
+          let data = {name: '', content: {}};
           let dataContent = {...data.content};
           data.name = response.name;
           setSectionName({name: 'name', type: 'Text', id: 'name', val: response.name});
@@ -112,12 +120,14 @@ export default function SingleSection(props) {
           const resMessage = (error.response && error.response.data && error.response.data.message) || error.message || error.toString();
           Notification({title: texts.notificationErr, description: resMessage, type: 'error'});
         });
+      } else {
+        setLoading(false);
       }
     }).catch((error) => {
       const resMessage = (error.response && error.response.data && error.response.data.message) || error.message || error.toString();
       Notification({title: texts.notificationErr, description: resMessage, type: 'error'});
     });
-  }, [props, sectionData]);
+  }, [props]);
   // FieldTypes Modal Callbacks
   const openSelectFieldDialog = () => {
     setFieldSelectModal(true);
@@ -173,8 +183,13 @@ export default function SingleSection(props) {
     let content = {...sectionContent};
     let data = {...sectionData};
     let dataContent = { ...data.content};
-
-    content[selectedModule.name] = {type: 'Module', name: selectedModule.name};
+  
+    if (content.hasOwnProperty(selectedModule.name)) {
+      const newKey = selectedModule.name + findDuplicatedKeyCount(selectedModule.name, content);
+      content[newKey] = {type: 'Module', name: selectedModule.name};
+    } else {
+      content[selectedModule.name] = {type: 'Module', name: selectedModule.name};
+    }
     setSectionContent(content); // add module content to the contents state
     if (dataContent.hasOwnProperty('modules')) {
       dataContent.modules.push(param);

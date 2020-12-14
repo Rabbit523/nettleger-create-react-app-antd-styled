@@ -2,34 +2,34 @@ import React, { useState, useEffect, useContext } from "react";
 import { Layout } from 'antd';
 import EnhancedTable from '../../../components/table';
 import Notification from '../../../components/notification';
-import PageLoading from '../../../components/spin';
 import PageHeader from '../../../components/pageHeader';
 import PageLayout from '../../../components/pageLayout';
+import PageLoading from '../../../components/spin';
 import ApiService from "../../../service/api.service";
 import { ThemeContext } from "../../../context/custom";
-import { texts, pageHeadCells } from '../../../constant';
+import { texts, treatmentHeadCells } from '../../../constant';
 
 const { Content } = Layout;
 
-function createData(id, name, slug, status, time) {
-  return { id, name, slug, status, time };
+function createData(id, name, cost, time) {
+  return { id, name, cost, time };
 }
 
-function Pages(props) {
-  const [isLoading, setLoading] = useState(false);
-  const [rowData, setRowData] = useState([]);
+function Treatments(props) {
+  const [isLoading, setLoading] = useState(true);
   const {collapsed, setCollapseData} = useContext(ThemeContext);
+  const [rowData, setRowData] = useState([]);
   const [currentPath, setCurrentPath] = useState('');
 
   useEffect(() => {
     setLoading(true);
-    ApiService.getAllPage().then(result => {
+    ApiService.getAllTreatments().then(result => {
       let data = [];
       Object.values(result).map(row => {
         const date = new Date(row.date);
         const dateString = date.getUTCFullYear() + "/" + ("0" + (date.getUTCMonth()+1)).slice(-2) + "/" + ("0" + date.getUTCDate()).slice(-2) + " " +
           ("0" + date.getUTCHours()).slice(-2) + ":" + ("0" + date.getUTCMinutes()).slice(-2) + ":" + ("0" + date.getUTCSeconds()).slice(-2);
-        data.push(createData(row.id, row.name, row.slug, row.status === 0 ? 'Saved' : row.status === 1 ? 'Published': 'Unpublished', dateString));
+        data.push(createData(row.id, row.name, row.card_cost, dateString));
         return true;
       });
       setRowData(data);
@@ -46,9 +46,10 @@ function Pages(props) {
   const toggle = () => {
     setCollapseData();
   };
-  const handleDeleteItem = (pageId) => {
+
+  const handleDeleteItem = (treatmentId) => {
     setLoading(true);
-    ApiService.deletePage({pageId}).then(() => {
+    ApiService.deleteTreatment({treatmentId}).then(() => {
       window.location.reload();
     }).catch((error) => {
       const resMessage = (error.response && error.response.data && error.response.data.message) || error.message || error.toString();
@@ -56,11 +57,11 @@ function Pages(props) {
       setLoading(false);
     });
   };
-  const handleDetailItem = (pageId) => {
-    props.history.push({ pathname: `/admin/pages/edit/${pageId}`, state: { pageId } });
+  const handleDetailItem = (treatmentId) => {
+    props.history.push({ pathname: `/admin/treatments/edit/${treatmentId}`, state: { treatmentId } });
   };
   const handleCreatePage = () => {
-    props.history.push('/admin/pages/create');
+    props.history.push('/admin/treatments/create');
   };
 
   return (
@@ -70,9 +71,9 @@ function Pages(props) {
       <PageLayout>
         <Content>
           <EnhancedTable
-            headCells={pageHeadCells}
+            headCells={treatmentHeadCells}
             rowData={rowData}
-            tableName={texts.pages}
+            tableName={texts.treatments}
             onDeleteClick={handleDeleteItem}
             onDetailClick={handleDetailItem}
             onCreateClick={handleCreatePage}
@@ -83,4 +84,4 @@ function Pages(props) {
   );
 };
 
-export default Pages;
+export default Treatments;

@@ -76,12 +76,13 @@ export default function SelectModal(props) {
   const classes = useStyles();
 
   const onSubmit = () => {
-    const isValidated = texts[type] === 'Module' ? id && amount && direction : id;
-    const data = texts[type] === 'Module' ? { id, amount, direction } : { id };
+    const isValidated = type === 'Module' ? id && amount && direction : id;
+    const data = type === 'Module' ? { moduleId: id, amount, direction } : { id };
+    
     if (isValidated) {
       handleClick(data);
     } else {
-      texts[type] === 'Module' ? setErrors({
+      type === 'Module' ? setErrors({
         idError: id ? false : true,
         dirError: direction ? false : true,
         amountError: amount ? false : true
@@ -90,27 +91,15 @@ export default function SelectModal(props) {
   };
   const handleIdChange = (e) => {
     setId(e.target.value);
-    texts[type] === 'Module' ? setErrors({
-      idError: false,
-      dirError: direction ? false : true,
-      amountError: amount ? false : true
-    }) : setErrors({idError: false});
+    setErrors({ idError: false });
   };
   const handleDirChange = (e) => {
     setDirection(e.target.value);
-    setErrors({
-      idError: id ? false : true,
-      dirError: false,
-      amountError: amount ? false : true
-    });
+    setErrors({ dirError: false });
   };
   const handleAmountChange = (e) => {
     setAmount(e.target.value);
-    setErrors({
-      idError: id ? false : true,
-      dirError: direction ? false : true,
-      amountError: false
-    })
+    setErrors({ amountError: false });
   };
 
   return (
@@ -121,7 +110,7 @@ export default function SelectModal(props) {
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <FormControl variant="outlined" className={classes.formControl}>
-                <InputLabel>{texts[type] === 'Module' ? texts.module : texts.section}</InputLabel>
+                <InputLabel>{type === 'Module' ? texts.module : texts.section}</InputLabel>
                 <Select
                   native
                   value={id}
@@ -129,7 +118,7 @@ export default function SelectModal(props) {
                   label={texts.select}
                   variant="outlined"
                 >
-                  <option value="none">{texts[type] === 'Module' ? texts.Module : texts.Section}</option>
+                  <option value="none">{type === 'Module' ? texts.Module : texts.Section}</option>
                   {data.map((item, index) => (
                     <option key={index} value={item.id}>{item.name}</option>
                   ))}
@@ -138,7 +127,7 @@ export default function SelectModal(props) {
                 <DialogContentText className={classes.text}>{texts.selectDescription}</DialogContentText>
               </FormControl>
             </Grid>
-            {texts[type] === 'Module' && <Grid item xs>
+            {type === 'Module' && <Grid item xs>
               <TextField
                 autoFocus
                 fullWidth
@@ -152,7 +141,7 @@ export default function SelectModal(props) {
               {errors.dirError && <p className={classes.errText}>{texts.validText}</p>}
               <DialogContentText className={classes.text}>{texts.nameDescription}</DialogContentText>
             </Grid>}
-            {texts[type] === 'Module' && <Grid item xs>
+            {type === 'Module' && <Grid item xs>
               <TextField
                 autoFocus
                 fullWidth

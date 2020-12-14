@@ -54,6 +54,16 @@ function findKeyValueCount(key, obj) {
 	});
 	return count;
 };
+function findDuplicatedKeyCount(key, obj) {
+	var count = 0;
+	var keys = Object.keys(obj);
+	keys.forEach(function(k) {
+		if(k.includes(key)) {
+			count += 1;
+		}
+	});
+	return count;
+};
 function isUnique(key, obj) {
 	return findKeyValueCount(key, obj) === 1;
 };
@@ -172,14 +182,15 @@ export default function SinglePage(props) {
     const selectedSection = sections.find((sel) => sel.id === parseInt(param.id));
     let content = {...pageContent};
     let data = {...pageData};
-    content[selectedSection.name] = {type: 'Section', name: selectedSection.name};
+    const newKey = selectedSection.name + findDuplicatedKeyCount(selectedSection.name, content);
+    content[newKey] = {type: 'Section', name: selectedSection.name, key: newKey};
     setPageContent(content);
-
+    debugger
     const sectionContent = JSON.parse(selectedSection.content);
-    if (!data.hasOwnProperty('sections')) {
+    if (!data.hasOwnProperty('sections') || !data.section) {
       data['sections'] = {};
     }
-    data['sections'][selectedSection.name] = sectionContent;
+    data['sections'][newKey] = sectionContent;
     setPageData(data);
     setNFields(nFields + 1);
   };
@@ -203,8 +214,8 @@ export default function SinglePage(props) {
     let updatedData = {...sectionContent};
     Object.keys(sectionContent).forEach((key) => {
       if (pageData.hasOwnProperty('sections')) {
-        const sectionData = pageData.sections[data.name];
-        if (key !== 'modules' && typeof sectionData[key] != 'object') {
+        const sectionData = pageData.sections[data.key ? data.key : data.name];
+        if (key !== 'modules' && key !== 'treatments' &&typeof sectionData[key] != 'object') {
           sectionContent[key]['val'] = sectionData[key];
         } else {
           // set module values
@@ -219,7 +230,7 @@ export default function SinglePage(props) {
         sectionContent[selectedModule.name] = {type: 'Module', name: selectedModule.name, amount: sel.amount};
       });
     }
-    setSelectedSection({name: section.name, content: sectionContent});
+    setSelectedSection({name: data.key ? data.key : section.name, content: sectionContent});
     setDetailDrawer(true);
   };
   const closeDetailDrawer = () => {
