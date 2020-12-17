@@ -52,6 +52,27 @@ export const formFieldTypes = [
   },
   {
     id: 5,
+    type: 'Textarea',
+    svg: '/images/textIcon.svg',
+    title: 'Textarea',
+    description: 'Add textarea to the form'
+  },
+  {
+    id: 6,
+    type: 'Number',
+    svg: '/images/number.svg',
+    title: 'Number',
+    description: 'ID, order number, rating, quantity'
+  },
+  {
+    id: 7,
+    type: 'Date',
+    svg: '/images/date.svg',
+    title: 'Date and time',
+    description: 'Event dates'
+  },
+  {
+    id: 8,
     type: 'Questions',
     svg: '/images/question.svg',
     title: 'Question list',
@@ -367,6 +388,7 @@ export const texts = {
   requiredFieldDescription: 'Du vil ikke kunne publisere en oppføring hvis dette feltet er tomt',
   RichText:'Nytt rikt tekstfelt', 
   Text: 'Nytt tekstfelt',
+  Textarea: 'Nytt tekstfelt',
   Number: 'Nytt heltallfelt',
   Date: 'Nytt felt for dato og tid',
   Location: 'Nytt plasseringsfelt',
@@ -382,6 +404,8 @@ export const texts = {
   Checkbox: 'Ny avkrysningsrute',
   FormGroup: 'Ny skjema gruppe',
   dateTime: 'Dato tid',
+  dateFrom: 'Dato fra',
+  dateTo: 'Dato til',
   number: 'Nummer',
   notificationErr: 'Feil oppsto',
   notificationErrMsg: {name: 'Det kreves et navnefelt.', duplicate: 'Et navnefelt kan ikke dupliseres.', upload: 'Opplasting mislyktes.', page: 'Kontroller validering av sidemodell. Kontroller MODELLVALIDERINGEN på skuffpanelet.', treatment: 'Kontroller MODELLVALIDERINGEN på skuffpanelet.', addForm: 'Kan ikke legge til skjemagruppe her. Velg trinn 2.'},

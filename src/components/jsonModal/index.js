@@ -11,6 +11,7 @@ import Accordion from '@material-ui/core/Accordion';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
 import AccordionSummary from '@material-ui/core/AccordionSummary';
 import AddIcon from '@material-ui/icons/Add';
+import CreateIcon from '@material-ui/icons/Create';
 import SaveIcon from '@material-ui/icons/Save';
 import CloseIcon from '@material-ui/icons/Close';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -54,7 +55,7 @@ const STabs = styled(Tabs)`
 const DialogTitle = withStyles(styles)((props) => {
   const { children, classes, onClose, ...other } = props;
   return (
-    <MuiDialogTitle disableTypography className={classes.root} {...other}>
+    <MuiDialogTitle disableTypography className={classes.root} { ...other }>
       <Typography variant="h6">{children}</Typography>
       {onClose ? (
         <IconButton aria-label="close" className={classes.closeButton} onClick={onClose}>
@@ -127,35 +128,22 @@ function isEmpty(obj) {
   return true;
 };
 function formFieldsValidation(name, target, data) {
-  let isValid = true;
-  Object.keys(data).forEach((key) => {
-    if (key === name) {
-      if (typeof data[key] === 'object') {
-        if (data[key]['type'] === target) {
-          isValid = false;
-        }
-      } else {
-        isValid = false;
-      }
+  let duplicatedKeyCount = 0;
+  data.forEach((item) => {
+    if(item.name === name && item.type === target) {
+      duplicatedKeyCount ++;
     }
   });
-  return isValid;
+  return duplicatedKeyCount > 1 ? false : true;
 }
 export default function JsonModal(props) {
   const { open, title, jsonData, jsonContent, handleClose, handleSend } = props;
   const [isFieldSelectModal, setFieldSelectModal] = useState(false);
-  const [questionExpaned, setQuestionExpaned] = useState(false);
-  const [selectExpaned, setSelectExpaned] = useState(false);
-  const [radioExpaned, setRadioExpaned] = useState(false);
   const [formContent, setFormContent] = useState([]);
   const [formData, setFormData] = useState({});
   const [errors, setErrors] = useState({ Select: false, Questions: false, Radio: false, Input: false, Checkbox: false });
-  const [checkedGroup, setCheckedGroup] = useState({
-    Select: { label: false, tooltip: false },
-    Radio: { label: false, tooltip: false },
-    Input: { label: false, tooltip: false },
-    Checkbox: { label: false, tooltip: false }
-  });
+  const [checkedGroup, setCheckedGroup] = useState({});
+  const [expandedGroup, setExpandedGroup] = useState({});
   const [activeKey, setActiveKey] = useState("1");
   const classes = useStyles();
   const dialogRef = useRef();
@@ -169,14 +157,57 @@ export default function JsonModal(props) {
         });
         setFormContent(content);
       } else {
+        const checkedGroupTmp = { ...checkedGroup };
+        const expandedGroupTmp = { ...expandedGroup };
+        jsonContent.forEach((item, key) => {
+          if (item.type === 'Select') {
+            checkedGroupTmp[key] = {
+              label: item.label ? true : false,
+              tooltip: item.tooltip ? true : false,
+              multi: item.multi ? item.multi : false,
+              country: item.country ? item.country : false
+            };
+            expandedGroupTmp[key] = false;
+          } else if (item.type === 'Date') {
+            checkedGroupTmp[key] = {
+              label: item.label ? true : false,
+              tooltip: item.tooltip ? true : false,
+              dateFrom: item.dateFrom ? item.dateFrom : false,
+              country: item.dateTo ? item.dateTo : false
+            };
+            expandedGroupTmp[key] = false;
+          } else if (item.type !== 'Text') {
+            checkedGroupTmp[key] = {
+              label: item.label ? true : false,
+              tooltip: item.tooltip ? true : false
+            };
+            expandedGroupTmp[key] = false;
+          }
+        })
+        setCheckedGroup(checkedGroupTmp);
+        setExpandedGroup(expandedGroupTmp);
         setFormContent(jsonContent);
       }
       setFormData(jsonData);
     }
   }, [title, jsonContent, jsonData]);
+  // check create or update button
+  const buttonValidate = (name, type, index) => {
+    let isCreate = true;
+    Object.keys(formData).forEach((key, i) => {
+      if (key === name) {
+        if (formData[key]['type'] === type && i === index) {
+          isCreate = false;
+        }
+      }
+    });
+    return isCreate;
+  }
   // Select fields
   const handleFieldSelect = (param) => {
-    let content = [...formContent];
+    let content = [ ...formContent ];
+    let checkedGroupTmp = { ...checkedGroup };
+    let expandedGroupTmp = { ...expandedGroup };
     let newComponent = { name: param.type, type: param.type };
     if (param.type === 'Questions') {
       newComponent['list'] = [];
@@ -184,11 +215,18 @@ export default function JsonModal(props) {
     } else if (param.type === 'Select' || param.type === 'Radio') {
       newComponent['options'] = [];
       newComponent['name'] = "";
-    } else {
+    } else if (param.type === 'Date' || param.type === 'Number') {
+      newComponent['name'] = "";
+    }else {
       newComponent['name'] = "";
       newComponent['placeholder'] = "";
     }
     content.push(newComponent);
+    checkedGroupTmp[content.length - 1] = { label: false, tooltip: false};
+    expandedGroupTmp[content.length - 1] = false;
+
+    setCheckedGroup(checkedGroupTmp);
+    setExpandedGroup(expandedGroupTmp);
     setFormContent(content);
     setFieldSelectModal(false);
     setActiveKey("2");
@@ -198,13 +236,13 @@ export default function JsonModal(props) {
   };
   // Handle all text field change event
   const handleTextChange = (e, type, key) => {
-    let content = [...formContent];
+    let content = [ ...formContent ];
     let data = { ...formData };
     if (key < 2) {
       content[key]['value'] = e.target.value;
       data[type] = e.target.value;
     } else {
-      if (type !== 'label' && type !== 'tooltip' && type !== 'placeholder') {
+      if (type !== 'label' && type !== 'tooltip' && type !== 'placeholder' && type !== 'from' && type !== 'to') {
         content[key]['name'] = e.target.value;
         setErrors({ type: false });
       } else {
@@ -215,29 +253,25 @@ export default function JsonModal(props) {
     setFormData(data);
   };
   const handleAccordionChange = (key) => {
-    if (key === 'Questions') {
-      setQuestionExpaned(!questionExpaned);
-    } else if (key === 'Select') {
-      setSelectExpaned(!selectExpaned);
-    } else {
-      setRadioExpaned(!radioExpaned);
-    }
+    let expandedGroupTmp = { ...expandedGroup };
+    expandedGroupTmp[key] = !expandedGroupTmp[key];
+    setExpandedGroup(expandedGroupTmp);
   };
-  const handleCheckChange = (e, key, type, target) => {
-    let content = [...formContent];
-    if (content[key].hasOwnProperty(target)) {
-      delete content[key][target];
-    } else {
-      if (target !== 'multi' && target !== 'country') {
-        content[key][target] = "";
-      } else {
-        content[key][target] = e.target.checked;
-      }
-    }
+  const handleCheckChange = (e, key, target) => {
+    let content = [ ...formContent ];
     let checked = { ...checkedGroup };
-    checked[type][target] = !checked[type][target];
+    if (target === 'multi' || target === 'country' || target === 'dateFrom' || target === 'dateTo') {
+      if (checked[key].hasOwnProperty(target)) {
+        checked[key][target] = !checked[key][target];
+      } else {
+        checked[key][target] = true;
+      }
+      content[key][target] = checked[key][target];
+      setFormContent(content);
+    } else {
+      checked[key][target] = !checked[key][target];
+    }
     setCheckedGroup(checked);
-    setFormContent(content);
   };
   const handleTabChange = (key) => {
     setActiveKey(key);
@@ -245,13 +279,15 @@ export default function JsonModal(props) {
   // Handle Field Events Add/Remove/Change/Save
   const onAddElement = (index, target) => {
     const item = target === 'Questions' ? 'list' : 'options';
-    let content = [...formContent];
+    let content = [ ...formContent ];
     content[index][item].push(target === 'Questions' ? 'Nytt spørsmål' : 'Nytt alternativ');
     setFormContent(content);
-    target === 'Questions' ? setQuestionExpaned(true) : target === 'Select' ? setSelectExpaned(true) : setRadioExpaned(true);
+    let expandedGroupTmp = { ...expandedGroup };
+    expandedGroupTmp[index] = true;
+    setExpandedGroup(expandedGroupTmp);
   };
   const onDeleteElement = (index, target) => {
-    let content = [...formContent];
+    let content = [ ...formContent ];
     content.splice(index, 1);
     setFormContent(content);
     let data = { ...formData };
@@ -259,32 +295,34 @@ export default function JsonModal(props) {
     setFormData(data);
   };
   const onRemoveItem = (key, subKey, item) => {
-    let content = [...formContent];
+    let content = [ ...formContent ];
     content[key][item].splice(subKey, 1);
     setFormContent(content);
   };
   const handleItemChange = (e, key, subKey, item) => {
-    let content = [...formContent];
+    let content = [ ...formContent ];
     content[key][item][subKey] = e.target.value;
     setFormContent(content);
   };
-  const onSaveElement = (index, target) => {
+  const onCreateElement = (index, target) => {
     let data = { ...formData };
+    let expandedGroupTmp = { ...expandedGroup };
     if (target === 'Questions') {
       data[target] = formContent[index]['list'];
-      setQuestionExpaned(false);
+      expandedGroupTmp[index] = false;
+      setExpandedGroup(expandedGroupTmp);
       setFormData(data);
     } else {
       if (formContent[index].type === target) {
         if (formContent[index]['name']) {
           const name = formContent[index]['name'];
-          if (formFieldsValidation(name, target, data)) {
-            data[name] = [];
+          if (formFieldsValidation(name, target, formContent)) {
+            data[name] = {};
             data[name]['type'] = target;
             if (target === 'Select' || target === 'Radio') {
               data[name]['options'] = formContent[index]['options'];
-              target === 'Select' ? setSelectExpaned(false) : setRadioExpaned(false);
-            } else {
+              expandedGroupTmp[index] = false;
+            } else if (target !== 'Date' && target !== 'Number') {
               data[name]['placeholder'] = formContent[index]['placeholder'];
             }
             if (formContent[index].hasOwnProperty('label')) {
@@ -299,19 +337,72 @@ export default function JsonModal(props) {
             if (formContent[index].hasOwnProperty('country')) {
               data[name]['country'] = formContent[index]['country'];
             }
+            if (formContent[index].hasOwnProperty('dateFrom')) {
+              data[name]['dateFrom'] = formContent[index]['dateFrom'];
+            }
+            if (formContent[index].hasOwnProperty('dateTo')) {
+              data[name]['dateTo'] = formContent[index]['dateTo'];
+            }
+            setExpandedGroup(expandedGroupTmp);
             setFormData(data);
           } else {
             message.config({getContainer: () => dialogRef.current });
             message.error('Et navnefelt kan ikke dupliseres.');
-            let content = [...formContent];
+            let content = [ ...formContent ];
             content[index]['name'] = '';
             setFormContent(content);
-            delete data[name];
-            setFormData(data);
             let errs = { ...errors };
             errs[target] = true;
             setErrors(errs);
           }
+        } else {
+          let errs = { ...errors };
+          errs[target] = true;
+          setErrors(errs);
+        }
+      }
+    }
+  };
+  const onSaveElement = (index, target) => {
+    let data = { ...formData };
+    let expandedGroupTmp = { ...expandedGroup };
+    if (target === 'Questions') {
+      data[target] = formContent[index]['list'];
+      expandedGroupTmp[index] = false;
+      setExpandedGroup(expandedGroupTmp);
+      setFormData(data);
+    } else {
+      if (formContent[index].type === target) {
+        if (formContent[index]['name']) {
+          const name = formContent[index]['name'];
+          data[name] = {};
+          data[name]['type'] = target;
+          if (target === 'Select' || target === 'Radio') {
+            data[name]['options'] = formContent[index]['options'];
+            expandedGroupTmp[index] = false;
+          } else if (target !== 'Date' && target !== 'Number') {
+            data[name]['placeholder'] = formContent[index]['placeholder'];
+          }
+          if (formContent[index].hasOwnProperty('label')) {
+            data[name]['label'] = formContent[index]['label'];
+          }
+          if (formContent[index].hasOwnProperty('tooltip')) {
+            data[name]['tooltip'] = formContent[index]['tooltip'];
+          }
+          if (formContent[index].hasOwnProperty('multi')) {
+            data[name]['multi'] = formContent[index]['multi'];
+          }
+          if (formContent[index].hasOwnProperty('country')) {
+            data[name]['country'] = formContent[index]['country'];
+          }
+          if (formContent[index].hasOwnProperty('dateFrom')) {
+            data[name]['dateFrom'] = formContent[index]['dateFrom'];
+          }
+          if (formContent[index].hasOwnProperty('dateTo')) {
+            data[name]['dateTo'] = formContent[index]['dateTo'];
+          }
+          setExpandedGroup(expandedGroupTmp);
+          setFormData(data);
         } else {
           let errs = { ...errors };
           errs[target] = true;
@@ -325,7 +416,7 @@ export default function JsonModal(props) {
     setFieldSelectModal(true);
   };
   const onSubmit = () => {
-    let content = [...formContent];
+    let content = [ ...formContent ];
     content.forEach((obj, index) => {
       if (obj.type !== 'Text' && obj.name === '') {
         delete content[index];
@@ -354,8 +445,7 @@ export default function JsonModal(props) {
                 <ReactJson theme="solarized" src={formData} name="Step2" />
               </TabPane>
               <TabPane tab={texts.fields} key={2}>
-                {formContent.map((item, key) =>
-                  <React.Fragment key={key}>
+                {formContent.map((item, key) => <React.Fragment key={key}>
                     {item.type === 'Text' && <TextField
                       fullWidth
                       margin="dense"
@@ -366,10 +456,76 @@ export default function JsonModal(props) {
                       label={texts[item.name]}
                       className={classes.cardInput}
                     />}
+                    {(item.type === 'Textarea' || item.type === 'Number') && <Card variant="outlined">
+                      <CardHeader title={texts[item.type]} className={classes.cardHeader}></CardHeader>
+                      <CardContent>
+                        <TextField
+                          fullWidth
+                          margin="dense"
+                          type="text"
+                          variant="outlined"
+                          value={item.name}
+                          onChange={(e) => handleTextChange(e, item.name, key)}
+                          label={texts.name}
+                          className={classes.cardInput}
+                        />
+                        {errors[item.type] && <p className={classes.errText}>{texts.validText}</p>}
+                        {item.type !== 'Number' && <TextField
+                          fullWidth
+                          margin="dense"
+                          type="text"
+                          variant="outlined"
+                          value={item.placeholder}
+                          onChange={(e) => handleTextChange(e, 'placeholder', key)}
+                          label={texts.placeholder}
+                          className={classes.cardInput}
+                        />}
+                        <FormGroup row>
+                          <FormControlLabel
+                            control={<Checkbox checked={checkedGroup[key]['label']} onChange={(e) => handleCheckChange(e, key, 'label')} color="primary" />}
+                            label={texts.label}
+                          />
+                          <FormControlLabel
+                            control={<Checkbox checked={checkedGroup[key]['tooltip']} onChange={(e) => handleCheckChange(e, key, 'tooltip')} color="primary" />}
+                            label={texts.tooltip}
+                          />
+                        </FormGroup>
+                        {(checkedGroup[key]['label'] || checkedGroup[key]['tooltip']) && <Grid container spacing={2}>
+                          {checkedGroup[key]['label'] && <Grid item xs={6}>
+                            <TextField
+                              fullWidth
+                              margin="dense"
+                              type="text"
+                              variant="outlined"
+                              value={item.label}
+                              onChange={(e) => handleTextChange(e, 'label', key)}
+                              label={texts.label}
+                            />
+                          </Grid>}
+                          {checkedGroup[key]['tooltip'] && <Grid item xs={6}>
+                            <TextField
+                              fullWidth
+                              margin="dense"
+                              type="text"
+                              variant="outlined"
+                              value={item.tooltip}
+                              onChange={(e) => handleTextChange(e, 'tooltip', key)}
+                              label={texts.tooltip}
+                            />
+                          </Grid>}
+                        </Grid>}
+                      </CardContent>
+                      <CardActions className={classes.cardAction}>
+                        {buttonValidate(item.name, item.type, key) ? 
+                          <Button onClick={() => onCreateElement(key, item.type)} color="primary" startIcon={<CreateIcon />} className={classes.btnAdd} variant="outlined"> {texts.create} </Button>
+                          : <Button onClick={() => onSaveElement(key, item.type)} color="primary" startIcon={<SaveIcon />} className={classes.btnAdd} variant="outlined"> {texts.save} </Button>}
+                        <Button onClick={() => onDeleteElement(key, item.name)} color="secondary" startIcon={<DeleteIcon />} variant="outlined"> {texts.delete} </Button>
+                      </CardActions>
+                    </Card>}
                     {item.type === 'Questions' && <Card variant="outlined">
                       <CardHeader title={texts.question} className={classes.cardHeader}></CardHeader>
                       <CardContent>
-                        <Accordion expanded={questionExpaned} onChange={() => handleAccordionChange(item.type)}>
+                        <Accordion expanded={expandedGroup[key]} onChange={() => handleAccordionChange(key)}>
                           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                             <div className={classes.column}>
                               <Typography className={classes.heading}>{texts.question}</Typography>
@@ -402,8 +558,10 @@ export default function JsonModal(props) {
                       </CardContent>
                       <CardActions className={classes.cardAction}>
                         <Button onClick={() => onAddElement(key, item.type)} color="primary" startIcon={<AddCircleOutlineIcon />} variant="outlined" className={classes.btnAdd}> {texts.add} </Button>
-                        <Button onClick={() => onSaveElement(key, item.type)} color="primary" startIcon={<SaveIcon />} variant="outlined"> {texts.save} </Button>
-                        <Button onClick={() => onDeleteElement(key, item.type)} color="secondary" startIcon={<DeleteIcon />} variant="outlined"> {texts.delete} </Button>
+                        {buttonValidate(item.name, item.type, key) ? 
+                          <Button onClick={() => onCreateElement(key, item.type)} color="primary" startIcon={<CreateIcon />} variant="outlined"> {texts.create} </Button>
+                          :<Button onClick={() => onSaveElement(key, item.type)} color="primary" startIcon={<SaveIcon />} variant="outlined"> {texts.save} </Button>}
+                        <Button onClick={() => onDeleteElement(key, item.name)} color="secondary" startIcon={<DeleteIcon />} variant="outlined"> {texts.delete} </Button>
                       </CardActions>
                     </Card>}
                     {(item.type === 'Select' || item.type === 'Radio') && <Card variant="outlined">
@@ -423,26 +581,26 @@ export default function JsonModal(props) {
                         {errors[item.type] && <p className={classes.errText}>{texts.validText}</p>}
                         {item.type === 'Select' && <FormGroup row>
                           <FormControlLabel
-                            control={<Checkbox onChange={(e) => handleCheckChange(e, key, item.type, 'multi')} color="primary" />}
+                            control={<Checkbox onChange={(e) => handleCheckChange(e, key, 'multi')} color="primary" />}
                             label={texts.multi}
                           />
                           <FormControlLabel
-                            control={<Checkbox onChange={(e) => handleCheckChange(e, key, item.type, 'country')} color="primary" />}
+                            control={<Checkbox onChange={(e) => handleCheckChange(e, key, 'country')} color="primary" />}
                             label={texts.country}
                           />
                         </FormGroup>}
                         <FormGroup row>
                           <FormControlLabel
-                            control={<Checkbox checked={checkedGroup[item.type]['label']} onChange={(e) => handleCheckChange(e, key, item.type, 'label')} color="primary" />}
+                            control={<Checkbox checked={checkedGroup[key]['label']} onChange={(e) => handleCheckChange(e, key, 'label')} color="primary" />}
                             label={texts.label}
                           />
                           <FormControlLabel
-                            control={<Checkbox checked={checkedGroup[item.type]['tooltip']} onChange={(e) => handleCheckChange(e, key, item.type, 'tooltip')} color="primary" />}
+                            control={<Checkbox checked={checkedGroup[key]['tooltip']} onChange={(e) => handleCheckChange(e, key, 'tooltip')} color="primary" />}
                             label={texts.tooltip}
                           />
                         </FormGroup>
-                        {(checkedGroup[item.type]['label'] || checkedGroup[item.type]['tooltip']) && <Grid container spacing={2}>
-                          {checkedGroup[item.type]['label'] && <Grid item xs={6}>
+                        {(checkedGroup[key]['label'] || checkedGroup[key]['tooltip']) && <Grid container spacing={2}>
+                          {checkedGroup[key]['label'] && <Grid item xs={6}>
                             <TextField
                               fullWidth
                               margin="dense"
@@ -453,7 +611,7 @@ export default function JsonModal(props) {
                               label={texts.label}
                             />
                           </Grid>}
-                          {checkedGroup[item.type]['tooltip'] && <Grid item xs={6}>
+                          {checkedGroup[key]['tooltip'] && <Grid item xs={6}>
                             <TextField
                               fullWidth
                               margin="dense"
@@ -465,7 +623,7 @@ export default function JsonModal(props) {
                             />
                           </Grid>}
                         </Grid>}
-                        <Accordion expanded={item.type === 'Select' ? selectExpaned : radioExpaned} onChange={() => handleAccordionChange(item.type)}>
+                        <Accordion expanded={expandedGroup[key]} onChange={() => handleAccordionChange(key)}>
                           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                             <div className={classes.column}>
                               <Typography className={classes.heading}>{texts[item.type]}</Typography>
@@ -498,8 +656,10 @@ export default function JsonModal(props) {
                       </CardContent>
                       <CardActions className={classes.cardAction}>
                         <Button onClick={() => onAddElement(key, item.type)} color="primary" startIcon={<AddCircleOutlineIcon />} variant="outlined" className={classes.btnAdd}> {texts.add} </Button>
-                        <Button onClick={() => onSaveElement(key, item.type)} color="primary" startIcon={<SaveIcon />} variant="outlined"> {texts.save} </Button>
-                        <Button onClick={() => onDeleteElement(key, item.type)} color="secondary" startIcon={<DeleteIcon />} variant="outlined"> {texts.delete} </Button>
+                        {buttonValidate(item.name, item.type, key) ?
+                          <Button onClick={() => onCreateElement(key, item.type)} color="primary" startIcon={<CreateIcon />} variant="outlined"> {texts.create} </Button>
+                          : <Button onClick={() => onSaveElement(key, item.type)} color="primary" startIcon={<SaveIcon />} variant="outlined"> {texts.save} </Button>}
+                        <Button onClick={() => onDeleteElement(key, item.name)} color="secondary" startIcon={<DeleteIcon />} variant="outlined"> {texts.delete} </Button>
                       </CardActions>
                     </Card>}
                     {(item.type === 'Input' || item.type === 'Checkbox') && <Card variant="outlined">
@@ -529,16 +689,16 @@ export default function JsonModal(props) {
                         />
                         <FormGroup row>
                           <FormControlLabel
-                            control={<Checkbox checked={checkedGroup[item.type]['label']} onChange={(e) => handleCheckChange(e, key, item.type, 'label')} color="primary" />}
+                            control={<Checkbox checked={checkedGroup[key]['label']} onChange={(e) => handleCheckChange(e, key, 'label')} color="primary" />}
                             label={texts.label}
                           />
                           <FormControlLabel
-                            control={<Checkbox checked={checkedGroup[item.type]['tooltip']} onChange={(e) => handleCheckChange(e, key, item.type, 'tooltip')} color="primary" />}
+                            control={<Checkbox checked={checkedGroup[key]['tooltip']} onChange={(e) => handleCheckChange(e, key, 'tooltip')} color="primary" />}
                             label={texts.tooltip}
                           />
                         </FormGroup>
-                        {(checkedGroup[item.type]['label'] || checkedGroup[item.type]['tooltip']) && <Grid container spacing={2}>
-                          {checkedGroup[item.type]['label'] && <Grid item xs={6}>
+                        {(checkedGroup[key]['label'] || checkedGroup[key]['tooltip']) && <Grid container spacing={2}>
+                          {checkedGroup[key]['label'] && <Grid item xs={6}>
                             <TextField
                               fullWidth
                               margin="dense"
@@ -549,7 +709,7 @@ export default function JsonModal(props) {
                               label={texts.label}
                             />
                           </Grid>}
-                          {checkedGroup[item.type]['tooltip'] && <Grid item xs={6}>
+                          {checkedGroup[key]['tooltip'] && <Grid item xs={6}>
                             <TextField
                               fullWidth
                               margin="dense"
@@ -563,8 +723,77 @@ export default function JsonModal(props) {
                         </Grid>}
                       </CardContent>
                       <CardActions className={classes.cardAction}>
-                        <Button onClick={() => onSaveElement(key, item.type)} color="primary" startIcon={<SaveIcon />} className={classes.btnAdd} variant="outlined"> {texts.save} </Button>
-                        <Button onClick={() => onDeleteElement(key, item.type)} color="secondary" startIcon={<DeleteIcon />} variant="outlined"> {texts.delete} </Button>
+                        {buttonValidate(item.name, item.type, key) ?
+                          <Button onClick={() => onCreateElement(key, item.type)} color="primary" startIcon={<CreateIcon />} className={classes.btnAdd} variant="outlined"> {texts.create} </Button>
+                          : <Button onClick={() => onSaveElement(key, item.type)} color="primary" startIcon={<SaveIcon />} className={classes.btnAdd} variant="outlined"> {texts.save} </Button>}
+                          <Button onClick={() => onDeleteElement(key, item.name)} color="secondary" startIcon={<DeleteIcon />} variant="outlined"> {texts.delete} </Button>
+                      </CardActions>
+                    </Card>}
+                    {item.type === 'Date' && <Card variant="outlined">
+                      <CardHeader title={texts[item.type]} className={classes.cardHeader}></CardHeader>
+                      <CardContent>
+                        <TextField
+                          fullWidth
+                          margin="dense"
+                          type="text"
+                          variant="outlined"
+                          value={item.name}
+                          onChange={(e) => handleTextChange(e, item.type, key)}
+                          label={texts.name}
+                          error={errors[item.type]}
+                          className={classes.cardInput}
+                        />
+                        {errors[item.type] && <p className={classes.errText}>{texts.validText}</p>}
+                        <FormGroup row>
+                          <FormControlLabel
+                            control={<Checkbox checked={checkedGroup[key]['dateFrom']} onChange={(e) => handleCheckChange(e, key, 'dateFrom')} color="primary" />}
+                            label={texts.dateFrom}
+                          />
+                          <FormControlLabel
+                            control={<Checkbox checked={checkedGroup[key]['dateTo']} onChange={(e) => handleCheckChange(e, key, 'dateTo')} color="primary" />}
+                            label={texts.dateTo}
+                          />
+                        </FormGroup>
+                        <FormGroup row>
+                          <FormControlLabel
+                            control={<Checkbox checked={checkedGroup[key]['label']} onChange={(e) => handleCheckChange(e, key, 'label')} color="primary" />}
+                            label={texts.label}
+                          />
+                          <FormControlLabel
+                            control={<Checkbox checked={checkedGroup[key]['tooltip']} onChange={(e) => handleCheckChange(e, key, 'tooltip')} color="primary" />}
+                            label={texts.tooltip}
+                          />
+                        </FormGroup>
+                        {(checkedGroup[key]['label'] || checkedGroup[key]['tooltip']) && <Grid container spacing={2}>
+                          {checkedGroup[key]['label'] && <Grid item xs={6}>
+                            <TextField
+                              fullWidth
+                              margin="dense"
+                              type="text"
+                              variant="outlined"
+                              value={item.label}
+                              onChange={(e) => handleTextChange(e, 'label', key)}
+                              label={texts.label}
+                            />
+                          </Grid>}
+                          {checkedGroup[key]['tooltip'] && <Grid item xs={6}>
+                            <TextField
+                              fullWidth
+                              margin="dense"
+                              type="text"
+                              variant="outlined"
+                              value={item.tooltip}
+                              onChange={(e) => handleTextChange(e, 'tooltip', key)}
+                              label={texts.tooltip}
+                            />
+                          </Grid>}
+                        </Grid>}
+                      </CardContent>
+                      <CardActions className={classes.cardAction}>
+                        {buttonValidate(item.name, item.type, key) ?
+                          <Button onClick={() => onCreateElement(key, item.type)} color="primary" startIcon={<CreateIcon />} className={classes.btnAdd} variant="outlined"> {texts.create} </Button>
+                          : <Button onClick={() => onSaveElement(key, item.type)} color="primary" startIcon={<SaveIcon />} className={classes.btnAdd} variant="outlined"> {texts.save} </Button>}
+                          <Button onClick={() => onDeleteElement(key, item.name)} color="secondary" startIcon={<DeleteIcon />} variant="outlined"> {texts.delete} </Button>
                       </CardActions>
                     </Card>}
                   </React.Fragment>
